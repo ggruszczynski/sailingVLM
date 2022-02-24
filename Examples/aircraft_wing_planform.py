@@ -7,6 +7,10 @@ from Solver.coeff_formulas import get_CL_CD_free_wing
 from Solver.forces import calc_force_wrapper, calc_pressure
 from Solver.vlm_solver import is_no_flux_BC_satisfied, calc_induced_velocity
 
+# set the threading layer before any parallel target compilation
+from numba import config, njit, threading_layer
+config.THREADING_LAYER = 'omp'
+
 ### GEOMETRY DEFINITION ###
 
 """

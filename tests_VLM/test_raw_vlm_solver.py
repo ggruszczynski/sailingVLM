@@ -43,7 +43,8 @@ class TestVLM_Solver(TestCase):
             V = [random.uniform(-10, 10), 0, random.uniform(-10, 10)]
             V_free_stream = np.array([V for i in range(self.N)])
 
-            A, RHS, _ = assembly_sys_of_eq(V_free_stream, self.panels)
+            panels1D = self.panels.flatten()
+            A, RHS, _ = assembly_sys_of_eq(V_free_stream, panels1D, len(panels1D))
             is_mat_symmeric = np.allclose(A, A.T, atol=1e-8)
             assert is_mat_symmeric
 
