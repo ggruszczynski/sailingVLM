@@ -18,5 +18,3 @@ jinja2 # BSD 3-Clause license
 
 PyQt5  # python to avoid blurry figures on Windows
 # pyqt # anaconda?
-
-numba
