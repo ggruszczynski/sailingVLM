@@ -1,7 +1,8 @@
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-from Rotations.geometry_calc import rotation_matrix
+
+from Rotations.geometry_calc import rotation_matrix, rotate_points_around_arbitrary_axis
 from unittest import TestCase
 from YachtGeometry.SailFactory import SailFactory
 from YachtGeometry.SailGeometry import SailSet
@@ -53,6 +54,33 @@ class TestRotations(TestCase):
         assert_almost_equal(point, point_back)
         assert_almost_equal(np.array([4.235680201509421, 33.56596871090129, 15.980762113533162]), rotated_point)
 
+
+    def test_rotate_points_around_arbitrary_axis(self):
+        x1 = np.array([6, -2, 0])
+        x2 = np.array([12, 8, 0])
+        ps = np.array([[3, 5, 0], [10, 6, 0]])
+        good = np.array([[5.64705882, 3.41176471, 5.34679673],
+                         [10.29411765, 5.82352941, 0.59408853]])
+        out = rotate_points_around_arbitrary_axis(ps, x1, x2, np.pi / 3)
+        np.testing.assert_array_almost_equal(out, good)
+
+
+        x1 = np.array([2, 0, 3 / 2])
+        x2 = np.array([1, 1, 1])
+        ps = np.array([[3, -1, 2]])
+        good = np.array([[3, -1, 2]])
+        # degree do not have any influence because point in ps array is on the same line as x1 and x2
+        out = rotate_points_around_arbitrary_axis(ps, x1, x2, np.pi / 12)
+        np.testing.assert_array_almost_equal(out, good)
+
+        x1 = np.array([1, 1, 0])
+        x2 = np.array([2, 2, 0])
+        ps = np.array([[2, 0, 0]])
+        good = np.array([[0, 2, 0]])
+        # degree do not have any influence because point in ps array is on the same line as x1 and x2
+        out = rotate_points_around_arbitrary_axis(ps, x1, x2, np.pi)
+        np.testing.assert_array_almost_equal(out, good)
+
     def test_sail_set_reverse_rotations(self):
         n_spanwise = 10  # No of control points (above the water) per sail
 
@@ -78,6 +106,24 @@ class TestRotations(TestCase):
         rotated_point = main_sail_geometry.csys_transformations.rotate_point_with_mirror(point)
         point_back = main_sail_geometry.csys_transformations.reverse_rotations_with_mirror(rotated_point)
         assert_almost_equal(point, point_back)
+
+    def test_rotations_with_axis_at_origin_of_CSYS(self):
+        x1 = np.array([0, 0, 0])  # start at the origin
+        # x2 = np.array([12, 8, 0])
+        # ps = np.array([[3, -1, 2]])
+
+        np.random.seed(1)
+        for _ in range(100):
+            x2 = np.random.randn(3)
+            ps = np.array([np.random.randn(3)])
+            out1 = rotate_points_around_arbitrary_axis(ps, x1, x2, np.pi / 3)[0]
+
+            axis = x2 - x1
+            Ry = rotation_matrix(axis, np.pi / 3)
+            out2 = np.dot(Ry, ps[0])
+
+            assert_almost_equal(out1, out2)
+
 
     def _prepare_sail_set(self, initial_twist_factor, n_spanwise=10, n_chordwise=1):
         # n_spanwise # No of control points (above the water) per sail
