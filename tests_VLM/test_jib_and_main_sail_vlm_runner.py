@@ -1,7 +1,7 @@
 import shutil
 
 from YachtGeometry.SailFactory import SailFactory
-from YachtGeometry.SailGeometry import SailSet
+from YachtGeometry.SailSet import SailSet
 from Rotations.CSYS_transformations import CSYS_transformations
 from Solver.Interpolator import Interpolator
 from YachtGeometry.HullGeometry import HullGeometry

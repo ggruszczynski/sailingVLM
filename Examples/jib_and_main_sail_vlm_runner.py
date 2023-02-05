@@ -2,12 +2,12 @@ import timeit
 import shutil
 
 from YachtGeometry.SailFactory import SailFactory
-from YachtGeometry.SailGeometry import SailSet
+from YachtGeometry.SailSet import SailSet
 from Rotations.CSYS_transformations import CSYS_transformations
 from Solver.Interpolator import Interpolator
 from YachtGeometry.HullGeometry import HullGeometry
 from Inlet.InletConditions import InletConditions
-from Inlet.Winds import ExpWindProfile
+from Inlet.Winds import ExpWindProfile, FlatWindProfile
 
 from ResultsContainers.save_results_utils import save_results_to_file
 from Solver.PanelsPlotter import display_panels_xyz_and_winds
@@ -21,6 +21,7 @@ from Solver.forces import calc_forces_on_panels_VLM_xyz
 
 # from InputData.jib_and_main_sail_vlm_case_backflow import *
 from InputData.jib_and_main_sail_vlm_case import *
+# from InputData.jib_and_main_sail_flat_vlm_case import *
 
 # np.set_printoptions(precision=3, suppress=True)
 
@@ -42,17 +43,22 @@ jib_geometry = sail_factory.make_jib(
     jib_chords=interpolator.interpolate_girths(jib_girths, jib_chords, n_spanwise + 1),
     sail_twist_deg=interpolator.interpolate_girths(jib_girths, jib_centerline_twist_deg, n_spanwise + 1),
     mast_LOA=mast_LOA,
-    LLT_twist=LLT_twist)
+    LLT_twist=LLT_twist,
+    interpolated_camber=interpolator.interpolate_girths(jib_girths, jib_sail_camber, n_spanwise + 1),
+    interpolated_distance_from_LE=interpolator.interpolate_girths(jib_girths, jib_sail_camber_distance_from_LE, n_spanwise + 1)
+)
 
 main_sail_geometry = sail_factory.make_main_sail(
     main_sail_luff=main_sail_luff,
     boom_above_sheer=boom_above_sheer,
     main_sail_chords=interpolator.interpolate_girths(main_sail_girths, main_sail_chords, n_spanwise + 1),
     sail_twist_deg=interpolator.interpolate_girths(main_sail_girths, main_sail_centerline_twist_deg, n_spanwise + 1),
-    LLT_twist=LLT_twist)
+    LLT_twist=LLT_twist,
+    interpolated_camber=interpolator.interpolate_girths(main_sail_girths, main_sail_camber, n_spanwise + 1),
+    interpolated_distance_from_LE=interpolator.interpolate_girths(main_sail_girths, main_sail_camber_distance_from_LE, n_spanwise + 1))
 
 sail_set = SailSet([jib_geometry, main_sail_geometry])
-# sail_set = SailSet([jib_geometry])
+
 
 # wind = FlatWindProfile(alpha_true_wind_deg, tws_ref, SOG_yacht)
 wind = ExpWindProfile(

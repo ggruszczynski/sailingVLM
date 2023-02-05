@@ -88,7 +88,11 @@ def display_panels_xyz(panels1d):
 
     for panel in panels1d:
         vtx = panel.get_points()
-        tri = a3.art3d.Poly3DCollection([vtx])
+        if panel.cp_position[2] > 0:
+            alpha = 1.00
+        else:
+            alpha = 0.15
+        tri = a3.art3d.Poly3DCollection([vtx], alpha=alpha)
         tri.set_color(m.to_rgba(panel.pressure))
         tri.set_edgecolor('k')
         ax.add_collection3d(tri)
@@ -113,14 +117,16 @@ def display_hull(ax, hull: HullGeometry):
     ax.plot(hull.deck_starboard_line_underwater[:, 0], hull.deck_starboard_line_underwater[:, 1], hull.deck_starboard_line_underwater[:, 2], 'gray', alpha=0.25)
 
 
-def display_winds(ax, cp_points, water_size,  inlet_condition: InletConditions, inviscid_flow_results):
+def display_winds(ax, cp_points, water_size,  inlet_condition: InletConditions, inviscid_flow_results: InviscidFlowResults):
     N = len(cp_points[:, 2])
 
     mean_AWA = np.mean(inlet_condition.AWA_infs_deg)
-    shift_x = (-0.925) * water_size * np.cos(np.deg2rad(mean_AWA))
-    shift_y = (-0.925) * water_size * np.sin(np.deg2rad(mean_AWA))
+    shift_x0 = (-0.925) * water_size * np.cos(np.deg2rad(mean_AWA))
+    shift_y0 = (-0.925) * water_size * np.sin(np.deg2rad(mean_AWA))
+    shift_x = shift_x0
+    shift_y = shift_y0
 
-    V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs, inviscid_flow_results.V_app_fs_at_cp]
+    V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs, inviscid_flow_results.V_induced_at_cp] # inviscid_flow_results.V_app_fs_at_cp
     colors = ['green', 'blue', 'red']  # G: True wind, B: - Apparent wind, R: Apparent + Induced wind
     for V_wind, color in zip(V_winds, colors):
         # V_wind = V_winds[2]
@@ -128,6 +134,14 @@ def display_winds(ax, cp_points, water_size,  inlet_condition: InletConditions, 
         for i in range(N):
             # vx = np.array([cp_points[i, 0], cp_points[i, 0] + V_wind[i, 0]])
             # vy = np.array([cp_points[i, 1], cp_points[i, 1] + V_wind[i, 1]])
+
+            if color == 'red':
+                # shift_x = 1.2*shift_x0 + cp_points[i, 0]
+                # shift_y = 1.2*shift_y0 + cp_points[i, 1]
+
+                shift_x = cp_points[i, 0]
+                shift_y = cp_points[i, 1]
+
             vx = np.array([shift_x, shift_x+V_wind[i, 0]])
             vy = np.array([shift_y, shift_y+V_wind[i, 1]])
             vz = np.array([cp_points[i, 2], cp_points[i, 2]])
@@ -137,7 +151,7 @@ def display_winds(ax, cp_points, water_size,  inlet_condition: InletConditions, 
             if cp_points[i, 2] > 0:
                 arrow = Arrow3D(vx, vy, vz, mutation_scale=10, lw=1, arrowstyle="-|>", color=color, alpha=0.75)
             else:
-                arrow = Arrow3D(vx, vy, vz, mutation_scale=10, lw=1, arrowstyle="-|>", color=color, alpha=0.15)
+                arrow = Arrow3D(vx, vy, vz, mutation_scale=10, lw=1, arrowstyle="-|>", color=color, alpha=0.05)
             ax.add_artist(arrow)
 
 
@@ -190,7 +204,7 @@ def display_panels_xyz_and_winds(panels1d,
                                  ):
     ax, cp_points, water_size = display_panels_xyz(panels1d)
     ax.set_title('Panels colored by pressure \n'
-                 'Winds: True (green), Apparent (blue), Apparent + Induced (red) \n'
+                 'Winds: True (green), Apparent (blue), Induced@CP (red) \n'
                  'Centre of Effort & Center of Lateral Resistance (black)')
 
     display_hull(ax, hull)

@@ -3,7 +3,7 @@ import pandas as pd
 from Solver.forces import calc_moments, extract_above_water_quantities, calc_moment_arm_in_shifted_csys
 from Solver.forces import determine_vector_from_its_dot_and_cross_product
 from Rotations.CSYS_transformations import CSYS_transformations
-from YachtGeometry.SailGeometry import SailSet
+from YachtGeometry.SailSet import SailSet
 
 from Inlet.InletConditions import InletConditions
 from Solver.forces import calc_force_LLT_xyz, calc_forces_on_panels_VLM_xyz
@@ -64,7 +64,7 @@ class InviscidFlowResults:
 
         dyn_dict = {}
         for i in range(len(sail_set.sails)):
-            F_xyz_above_water_tmp = sail_set.extract_data_above_water_by_id(self.F_xyz, i)
+            F_xyz_above_water_tmp = sail_set.extract_data_above_water_by_id(self.F_xyz, i)  # TODO: this does not work for half main above water
             r_tmp = sail_set.extract_data_above_water_by_id(r, i)
 
             F_xyz_above_water_tmp_total = np.sum(F_xyz_above_water_tmp, axis=0)

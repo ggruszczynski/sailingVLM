@@ -10,27 +10,33 @@ from Solver.vortices import \
 
 class Panel(object):
     """
-           y ^
-             |              Each panel is defined by the (x, y) coordinates
-        P3-C-|-D-P4         of four points - namely P1, P2, P3 and P4 -
-         | | | |  |         ordered clockwise. Points defining the horseshoe
-         | | +-P--|--->     - A, B, C and D - are named clockwise as well.
-         | |   |  |   x
-        P2-B---A-P1
+                y ^
+                 |                  Each panel is defined by the (x, y) coordinates
+        P3---C---|-------P4---D----             of four points - namely P1, P2, P3 and P4 -
+         |   :   |       |    :      ordered clockwise. Points defining the horseshoe
+         |   :   |       |    :      - A, B, C and D - are named clockwise as well.
+         |   :   +-P-----|---------------> x
+         |   :   |       |    :
+         |   :   |       |    :
+        P2---B---|-------P1---A----
 
     Parameters
     ----------
-    P1, P2, P3, P4 : array_like
+    P1, P2, P3, P4  : array_like
                      Corner points in a 3D euclidean space
+                     P1next, P4next refers to the corners of the next panel (along the streamline)
     """
     panel_counter = 0
     _are_no_coplanar_panels_reported = False
 
-    def __init__(self, p1, p2, p3, p4, gamma_orientation=1):
+    def __init__(self, p1, p2, p3, p4, gamma_orientation=1, p1next=None, p4next=None):
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
         self.p4 = p4
+        self.p1next = p1next
+        self.p4next = p4next
+
         self.gamma_orientation = gamma_orientation  # it can be turning clock or counter-clock wise
         # 1 is for a horizontal wing (glider), when air is flowing from below
         # -1 is for a vertical sail, when the wind is going from your back as you look towards the sail
@@ -94,7 +100,6 @@ class Panel(object):
         p2_p4 = self.p4 - self.p2
         p1_p3 = self.p3 - self.p1
         n = np.cross(p2_p4, p1_p3)
-        # n = np.cross(p1_p3, p2_p4)
         n = normalize(n)
         return n
 
@@ -175,6 +180,7 @@ class Panel(object):
         te_mid_point = self.get_trailing_edge_mid_points()
         tl = te_mid_point - le_mid_point
         ctr_p = le_mid_point + (3. / 4.) * tl
+
         return ctr_p
 
     @property
@@ -216,6 +222,7 @@ class Panel(object):
         te_mid_point = self.get_trailing_edge_mid_points()
         tl = te_mid_point - le_mid_point
         cp = le_mid_point + (1. / 4.) * tl
+
         return cp
 
     def get_vortex_ring_position(self):
@@ -227,13 +234,13 @@ class Panel(object):
                   ^
                  y|                Points defining the panel
                   |                are named clockwise.
-         P3--C----|---P4---D
-          |  |    |    |   |
-          |  |    |    |   |
-          |  |    +----|---------->
-          |  |         |   |      x
-          |  |         |   |
-         P2--B---------P1--A
+         P3--C----|---P4---D-----------P4next
+          |  :    |    |   :           |
+          |  :    |    |   :           |
+          |  :    +----|---------------|------------------->
+          |  :         |   :           |                 x
+          |  :         |   :           |
+         P2--B---------P1--A-----------P1next
 
         Parameters
         ----------
@@ -249,11 +256,13 @@ class Panel(object):
         p2_p1 = self.p1 - self.p2
         p3_p4 = self.p4 - self.p3
 
-        A = self.p1 + p2_p1 / 4.
+        p1_p1next = self.p1next - self.p1
+        p4_p4next = self.p4next - self.p4
+
+        A = self.p1 + p1_p1next/4
         B = self.p2 + p2_p1 / 4.
         C = self.p3 + p3_p4 / 4.
-        D = self.p4 + p3_p4 / 4.
-
+        D = self.p4 + p4_p4next / 4.
         return [A, B, C, D]
 
     def get_induced_velocity(self, ctr_p, V_app_infw):
@@ -266,4 +275,3 @@ class Panel(object):
 
         v = v_AB + v_BC + v_CD + v_DA
         return v
-

@@ -15,7 +15,7 @@ class TestPanels(TestCase):
         self.points = [np.array([10., 0., 0.]), np.array([0., 0., 0.]),
                        np.array([0., 10., 0.]), np.array([10., 10., 0.])]
 
-        self.panel = Panel(*self.points)
+        self.panel = Panel(*self.points, gamma_orientation=1, p1next=np.array([10., 0., 0.]), p4next=np.array([10., 10., 0.]))
         self.assertTrue(self.panel._are_points_coplanar())
 
     def test_area(self):
