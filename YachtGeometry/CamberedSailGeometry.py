@@ -129,17 +129,6 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
         panels = make_panels_from_mesh_spanwise(mesh, gamma_orientation=-1)
         panels_mirror = make_panels_from_mesh_spanwise(mesh_underwater, gamma_orientation=-1)
 
-
-        ## todo - debug
-        # from Solver.forces import get_stuff_from_panels
-        # # return get_stuff_from_panels(self.panels1d, 'cp_position', (self.panels1d.shape[0], 3))
-        # cp_pts = get_stuff_from_panels(panels.flatten(), 'cp_position', (panels.flatten().shape[0], 3))
-        # mirror_cp_pts = get_stuff_from_panels(panels_mirror.flatten(), 'cp_position', (panels_mirror.flatten().shape[0], 3))
-        # cp_pts = panels.get_cp_points1d()
-        # mirror_cp_pts = panels_mirror.get_cp_points1d()
-
-        # np.testing.assert_almost_equal(cp_pts, mirror_cp_pts)  # todo:
-
         # https://stackoverflow.com/questions/33356442/when-should-i-use-hstack-vstack-vs-append-vs-concatenate-vs-column-stack
         # self.__panels = np.vstack((panels, panels_mirror))
         self.__panels = np.hstack((panels_mirror, panels))  # original version
