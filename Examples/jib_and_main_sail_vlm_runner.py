@@ -91,6 +91,7 @@ print(f"Notice:\n"
 
 print(df_integrals)
 
+
 # rows_to_display = ['M_total_heeling', 'M_total_sway', 'F_sails_drag'] # select rows to print
 # print(df_integrals[df_integrals['Quantity'].isin(rows_to_display)])
 
@@ -98,4 +99,8 @@ print(f"\nCPU time: {float(timeit.default_timer() - start):.2f} [s]")
 
 print("Preparing visualization.")
 display_panels_xyz_and_winds(sail_set.panels1d, inlet_condition, inviscid_flow_results, hull)
+
+from Utils.git_utils import get_git_branch
+
+print(get_git_branch())
 print("Done.")
