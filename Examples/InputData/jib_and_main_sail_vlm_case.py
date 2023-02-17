@@ -44,14 +44,14 @@ mast_LOA = 0.15  # [m]
 main_sail_girths = np.array([0.00, 1./8, 1./4, 1./2, 3./4, 7./8, 1.00])
 main_sail_chords = np.array([4.00, 3.82, 3.64, 3.20, 2.64, 2.32, 2.00])
 main_sail_centerline_twist_deg = 15. * main_sail_girths + 5
-main_sail_camber = 9*np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01])
-main_sail_camber_distance_from_LE = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+main_sail_camber = 0*9*np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01])
+main_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
 
 jib_girths = np.array([0.00, 1./4, 1./2, 3./4, 1.00])
 jib_chords = np.array([3.80, 2.98, 2.15, 1.33, 0.5]) - 0.4
 jib_centerline_twist_deg = 15. * jib_girths + 10
-jib_sail_camber = 9*np.array([0.01, 0.01, 0.01, 0.01, 0.01])
-jib_sail_camber_distance_from_LE = np.array([0.5, 0.5, 0.5, 0.5, 0.5])
+jib_sail_camber = 0*9*np.array([0.01, 0.01, 0.01, 0.01, 0.01])
+jib_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
 
 # REFERENCE CSYS
 # The origin of the default CSYS is located @ waterline level and aft face of the mast

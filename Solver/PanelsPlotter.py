@@ -128,6 +128,14 @@ def display_winds(ax, cp_points, water_size,  inlet_condition: InletConditions, 
 
     V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs, inviscid_flow_results.V_induced_at_cp] # inviscid_flow_results.V_app_fs_at_cp
     colors = ['green', 'blue', 'red']  # G: True wind, B: - Apparent wind, R: Apparent + Induced wind
+
+    V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs,
+               # inviscid_flow_results.V_induced_at_cp
+               ]  # inviscid_flow_results.V_app_fs_at_cp
+    colors = ['green', 'blue', #'red'
+              ]  # G: True wind, B: - Apparent wind, R: Apparent + Induced wind
+
+
     for V_wind, color in zip(V_winds, colors):
         # V_wind = V_winds[2]
         # color = colors[2]

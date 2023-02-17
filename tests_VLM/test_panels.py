@@ -12,10 +12,16 @@ from unittest import TestCase
 
 class TestPanels(TestCase):
     def setUp(self):
-        self.points = [np.array([10., 0., 0.]), np.array([0., 0., 0.]),
-                       np.array([0., 10., 0.]), np.array([10., 10., 0.])]
+        p1 = np.array([10., 0., 0.])
+        p2 = np.array([0., 0., 0.])
+        p3 = np.array([0., 10., 0.])
+        p4 = np.array([10., 10., 0.])
 
-        self.panel = Panel(*self.points, gamma_orientation=1, p1next=np.array([10., 0., 0.]), p4next=np.array([10., 10., 0.]))
+        p1next = p1 + (p1 - p2)
+        p4next = p4 + (p4 - p3)
+
+        self.points = [p1, p2, p3, p4]
+        self.panel = Panel(*self.points, gamma_orientation=1, p1next=p1next, p4next=p4next)
         self.assertTrue(self.panel._are_points_coplanar())
 
     def test_area(self):
