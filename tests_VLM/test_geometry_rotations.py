@@ -86,6 +86,10 @@ class TestRotations(TestCase):
 
         main_sail_girths = np.array([0.00, 1. / 4, 1. / 2, 3. / 4, 7. / 8, 1.00])
         main_sail_chords = np.array([4.00, 3.64, 3.20, 2.64, 2.32, 2.00])
+        main_sail_centerline_twist_deg = 0. * main_sail_girths
+        main_sail_camber = 0 * np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01])
+        main_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+
         main_sail_luff = 12.4
         sheer_above_waterline = 1.20
         boom_above_sheer = 1.30
@@ -95,12 +99,16 @@ class TestRotations(TestCase):
                                    rake_deg=rake_deg,
                                    sheer_above_waterline=sheer_above_waterline)
 
-        main_sail_geometry = sail_factory.make_main_sail(main_sail_luff=main_sail_luff,
-                                                         boom_above_sheer=boom_above_sheer,
-                                                         main_sail_chords=self.interpolator.interpolate_girths(
-                                                             main_sail_girths,
-                                                             main_sail_chords,
-                                                             n_spanwise + 1))
+        main_sail_geometry = sail_factory.make_main_sail(
+        main_sail_luff=main_sail_luff,
+        boom_above_sheer=boom_above_sheer,
+        main_sail_chords=self.interpolator.interpolate_girths(main_sail_girths, main_sail_chords,n_spanwise + 1),
+        sail_twist_deg=self.interpolator.interpolate_girths(main_sail_girths, main_sail_centerline_twist_deg,n_spanwise + 1),
+        LLT_twist="real_twist",
+        interpolated_camber =self.interpolator.interpolate_girths(main_sail_girths, main_sail_camber, n_spanwise + 1),
+        interpolated_distance_from_LE=self.interpolator.interpolate_girths(main_sail_girths,
+                                                                        main_sail_max_camber_distance_from_luff,
+                                                                        n_spanwise + 1))
 
         point = np.array([10, 20, 30])
         rotated_point = main_sail_geometry.csys_transformations.rotate_point_around_origin_with_mirror(point)

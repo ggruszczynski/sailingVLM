@@ -59,8 +59,8 @@ class TestVLM_Solver(TestCase):
             mast_LOA=mast_LOA,
             LLT_twist=LLT_twist,
             interpolated_camber=self.interpolator.interpolate_girths(jib_girths, jib_sail_camber, n_spanwise + 1),
-            interpolated_distance_from_LE=self.interpolator.interpolate_girths(jib_girths, jib_sail_camber_distance_from_LE,
-                                                                        n_spanwise + 1)
+            interpolated_distance_from_LE=self.interpolator.interpolate_girths(jib_girths, jib_sail_max_camber_distance_from_luff,
+                                                                               n_spanwise + 1)
         )
 
         main_sail_geometry = sail_factory.make_main_sail(
@@ -71,8 +71,8 @@ class TestVLM_Solver(TestCase):
             LLT_twist=LLT_twist,
             interpolated_camber=self.interpolator.interpolate_girths(main_sail_girths, main_sail_camber, n_spanwise + 1),
             interpolated_distance_from_LE=self.interpolator.interpolate_girths(main_sail_girths,
-                                                                          main_sail_camber_distance_from_LE,
-                                                                          n_spanwise + 1))
+                                                                               main_sail_max_camber_distance_from_luff,
+                                                                               n_spanwise + 1))
 
         sail_set = SailSet([jib_geometry, main_sail_geometry])
         inlet_condition = InletConditions(self.wind, rho=rho, panels1D=sail_set.panels1d)
