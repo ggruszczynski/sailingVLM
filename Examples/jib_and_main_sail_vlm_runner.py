@@ -21,6 +21,7 @@ from Solver.forces import calc_forces_on_panels_VLM_xyz
 
 # from InputData.jib_and_main_sail_vlm_case_backflow import *
 from InputData.jib_and_main_sail_vlm_case import *
+# from InputData.test import *
 # from InputData.jib_and_main_sail_flat_vlm_case import *
 
 # np.set_printoptions(precision=3, suppress=True)

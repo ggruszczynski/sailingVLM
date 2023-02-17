@@ -16,7 +16,7 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
                  csys_transformations: CSYS_transformations,
                  n_spanwise=10, n_chordwise=1, chords=None,
                  initial_sail_twist_deg=None, name=None, LLT_twist=None,
-                 interpolated_camber=None, interpolated_distance_from_LE=None
+                 interpolated_camber=None, interpolated_max_camber_distance_from_luff=None
                  ):
 
         self.__n_spanwise = n_spanwise  # number of panels (span-wise) - above the water
@@ -74,15 +74,21 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
         # state "zero" (i.e. yacht in an upright position, without any rotations)
         mesh = make_airfoil_mesh([le_SW, le_NW],
                                  [self.__n_chordwise, self.__n_spanwise], chords_vec,
-                                 interpolated_distance_from_LE, interpolated_camber)
+                                 interpolated_max_camber_distance_from_luff, interpolated_camber)
         sh0, sh1, sh2 = mesh.shape
         mesh = mesh.reshape(sh0*sh1, sh2)
-        mesh_underwater = make_airfoil_mesh([le_SW_underwater, le_NW_underwater],[self.__n_chordwise, self.__n_spanwise],fchords_vec, interpolated_distance_from_LE, interpolated_camber).reshape(sh0*sh1, sh2)
+        mesh_underwater = make_airfoil_mesh([le_SW_underwater, le_NW_underwater],
+                                            [self.__n_chordwise, self.__n_spanwise], fchords_vec,
+                                            interpolated_max_camber_distance_from_luff, interpolated_camber).reshape(sh0 * sh1, sh2)
         mesh_underwater = mesh_underwater.reshape(sh0*sh1, sh2)
 
         # rotation
-        rmesh = np.array([self.csys_transformations.rotate_point_with_mirror(point) for point in mesh])
-        rmesh_underwater = np.array([self.csys_transformations.rotate_point_with_mirror(point) for point in mesh_underwater])
+        # mesh:  le NW p1 p2 ... te
+        #       le p1 p2 ... te
+        #       le p1 p2 ... te
+        #       le SW p2 ... te
+        rmesh = np.array([self.csys_transformations.rotate_point_around_origin_with_mirror(point) for point in mesh])
+        rmesh_underwater = np.array([self.csys_transformations.rotate_point_around_origin_with_mirror(point) for point in mesh_underwater])
 
         mesh = rmesh
         mesh_underwater = rmesh_underwater
@@ -96,6 +102,7 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
         }
         sail_twist_deg = twist_dict[LLT_twist]
         sail_twist_deg = np.hstack([sail_twist_deg] * (sh1))
+
         sail_twist_deg = sail_twist_deg.reshape(sh1, sh0).transpose().flatten()
 
         p2 = mesh[::sh1][-1]
@@ -106,7 +113,7 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
 
         p2_u = mesh_underwater[::sh1][-1]
         p1_u = mesh_underwater[::sh1][0]
-        trmesh_underwater = self.rotate_points_around_le(mesh_underwater, p1_u, p2_u, sail_twist_deg)
+        trmesh_underwater = self.rotate_points_around_le(mesh_underwater, p1_u, p2_u, np.flip(sail_twist_deg))
         # check if points on forestay are not rotated (they are on axis of rotation)
         np.testing.assert_almost_equal(trmesh_underwater[::sh1], mesh_underwater[::sh1])
 
@@ -121,6 +128,17 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
 
         panels = make_panels_from_mesh_spanwise(mesh, gamma_orientation=-1)
         panels_mirror = make_panels_from_mesh_spanwise(mesh_underwater, gamma_orientation=-1)
+
+
+        ## todo - debug
+        # from Solver.forces import get_stuff_from_panels
+        # # return get_stuff_from_panels(self.panels1d, 'cp_position', (self.panels1d.shape[0], 3))
+        # cp_pts = get_stuff_from_panels(panels.flatten(), 'cp_position', (panels.flatten().shape[0], 3))
+        # mirror_cp_pts = get_stuff_from_panels(panels_mirror.flatten(), 'cp_position', (panels_mirror.flatten().shape[0], 3))
+        # cp_pts = panels.get_cp_points1d()
+        # mirror_cp_pts = panels_mirror.get_cp_points1d()
+
+        # np.testing.assert_almost_equal(cp_pts, mirror_cp_pts)  # todo:
 
         # https://stackoverflow.com/questions/33356442/when-should-i-use-hstack-vstack-vs-append-vs-concatenate-vs-column-stack
         # self.__panels = np.vstack((panels, panels_mirror))
@@ -154,7 +172,7 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
         return rotated_points
     def get_cp_points_upright(self):
         cp_points = self.get_cp_points1d()
-        cp_straight_yacht = np.array([self.csys_transformations.reverse_rotations_with_mirror(p) for p in cp_points])
+        cp_straight_yacht = np.array([self.csys_transformations.reverse_point_rotations_around_origin_with_mirror(p) for p in cp_points])
         return cp_straight_yacht
 
     def sail_cp_to_girths(self):

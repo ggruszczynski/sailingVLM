@@ -17,7 +17,7 @@ class CSYS_transformations:
 
         self.v_from_original_xyz_2_reference_csys_xyz = v_from_original_xyz_2_reference_csys_xyz
 
-    def rotate_point_with_mirror(self, point):
+    def rotate_point_around_origin_with_mirror(self, point):
         """
         from upright csys to heeled csys
         """
@@ -29,7 +29,7 @@ class CSYS_transformations:
         point = np.dot(self.leeway_rotation_matrix, point)
         return point
 
-    def reverse_rotations_with_mirror(self, point):
+    def reverse_point_rotations_around_origin_with_mirror(self, point):
         """
         from heeled csys to upright csys
         """

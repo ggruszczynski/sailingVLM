@@ -49,8 +49,8 @@ class TestRotations(TestCase):
     def test_csys_rotations(self):
         point = np.array([10, 20, 30])
 
-        rotated_point = self.csys_transformations.rotate_point_with_mirror(point)
-        point_back = self.csys_transformations.reverse_rotations_with_mirror(rotated_point)
+        rotated_point = self.csys_transformations.rotate_point_around_origin_with_mirror(point)
+        point_back = self.csys_transformations.reverse_point_rotations_around_origin_with_mirror(rotated_point)
         assert_almost_equal(point, point_back)
         assert_almost_equal(np.array([4.235680201509421, 33.56596871090129, 15.980762113533162]), rotated_point)
 
@@ -103,8 +103,8 @@ class TestRotations(TestCase):
                                                              n_spanwise + 1))
 
         point = np.array([10, 20, 30])
-        rotated_point = main_sail_geometry.csys_transformations.rotate_point_with_mirror(point)
-        point_back = main_sail_geometry.csys_transformations.reverse_rotations_with_mirror(rotated_point)
+        rotated_point = main_sail_geometry.csys_transformations.rotate_point_around_origin_with_mirror(point)
+        point_back = main_sail_geometry.csys_transformations.reverse_point_rotations_around_origin_with_mirror(rotated_point)
         assert_almost_equal(point, point_back)
 
     def test_rotations_with_axis_at_origin_of_CSYS(self):
