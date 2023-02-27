@@ -81,8 +81,8 @@ def display_panels_xyz(panels1d):
     ### plot panels and color by pressure
     # https://stackoverflow.com/questions/15140072/how-to-map-number-to-color-using-matplotlibs-colormap
 
-    pressures = np.array([panel.pressure for panel in panels1d])
-    norm = mpl.colors.Normalize(vmin=min(pressures), vmax=max(pressures))
+    coeff_of_pressure = np.array([panel.coeff_of_pressure for panel in panels1d])
+    norm = mpl.colors.Normalize(vmin=min(coeff_of_pressure), vmax=max(coeff_of_pressure))
     cmap = cm.hot
     m = cm.ScalarMappable(norm=norm, cmap=cmap)
 
@@ -93,7 +93,7 @@ def display_panels_xyz(panels1d):
         else:
             alpha = 0.15
         tri = a3.art3d.Poly3DCollection([vtx], alpha=alpha)
-        tri.set_color(m.to_rgba(panel.pressure))
+        tri.set_color(m.to_rgba(panel.coeff_of_pressure))
         tri.set_edgecolor('k')
         ax.add_collection3d(tri)
 
@@ -126,8 +126,8 @@ def display_winds(ax, cp_points, water_size,  inlet_condition: InletConditions, 
     shift_x = shift_x0
     shift_y = shift_y0
 
-    V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs, inviscid_flow_results.V_induced_at_cp] # inviscid_flow_results.V_app_fs_at_cp
-    colors = ['green', 'blue', 'red']  # G: True wind, B: - Apparent wind, R: Apparent + Induced wind
+    # V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs, inviscid_flow_results.V_induced_at_cp] # inviscid_flow_results.V_app_fs_at_cp
+    # colors = ['green', 'blue', 'red']  # G: True wind, B: - Apparent wind, R: Apparent + Induced wind
 
     V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs,
                # inviscid_flow_results.V_induced_at_cp
@@ -211,7 +211,7 @@ def display_panels_xyz_and_winds(panels1d,
 
                                  ):
     ax, cp_points, water_size = display_panels_xyz(panels1d)
-    ax.set_title('Panels colored by pressure \n'
+    ax.set_title('Panels colored by coefficient of pressure \n'
                  'Winds: True (green), Apparent (blue), Induced@CP (red) \n'
                  'Centre of Effort & Center of Lateral Resistance (black)')
 

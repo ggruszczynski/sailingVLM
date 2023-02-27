@@ -2,7 +2,7 @@ import numpy as np
 from Solver.Panel import Panel
 from typing import List
 from Solver.TrailingEdgePanel import TrailingEdgePanel
-
+import numba
 
 # pomyslec nad jit by kod byl kompilowany
 # to mozna zrownoleglic jakos
@@ -44,9 +44,15 @@ def calc_circulation(V_app_ifnw, panels):
     return gamma_magnitude, v_ind_coeff
 
 
-def calc_induced_velocity(v_ind_coeff, gamma_magnitude):
+@numba.jit(numba.float64[:, ::1](numba.float64[:, :, ::1], numba.float64[::1]), nopython=True, debug=False)
+def calc_induced_velocity(v_ind_coeff: np.ndarray, gamma_magnitude: np.ndarray):
+    """
+    :param numba.typeof(v_ind_coeff) --> array(float64, 3d, C)
+    :param numba.typeof(gamma_magnitude) --> array(float64, 1d, C)
+    :return: numba.typeof(V_induced) --> array(float64, 2d, C)
+    """
     N = len(gamma_magnitude)
-    V_induced = np.full((N, 3), 0., dtype=float)
+    V_induced = np.full((N, 3), 0., dtype=np.float64)
     for i in range(N):
         for j in range(N):
             V_induced[i] += v_ind_coeff[i][j] * gamma_magnitude[j]

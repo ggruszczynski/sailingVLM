@@ -44,6 +44,7 @@ class Panel(object):
         Panel.panel_counter += 1
 
         self.pressure = None
+        self.coeff_of_pressure = None
         self.force_xyz = None
         self.V_app_fs_at_cp = None
         self.V_induced_at_cp = None
@@ -58,6 +59,9 @@ class Panel(object):
         area = self.get_panel_area()
         n = self.get_normal_to_panel()
         self.pressure = np.dot(self.force_xyz, n) / area  # todo: fix sign
+
+    def calc_pressure_coeff(self, rho, V):
+        self.coeff_of_pressure = self.pressure / (0.5*rho*np.dot(V,V))
 
     def _are_points_coplanar(self):
         # P1P2 = self.p1 - self.p2

@@ -16,6 +16,8 @@ from Solver.vlm_solver import is_no_flux_BC_satisfied
 from Solver.vlm_solver import calc_circulation
 from ResultsContainers.InviscidFlowResults import prepare_inviscid_flow_results_vlm
 from Solver.vlm_solver import calculate_app_fs
+from Utils.git_utils import get_git_branch, get_git_revision_hash
+
 from ResultsContainers.InviscidFlowResults import InviscidFlowResults
 from Solver.forces import calc_forces_on_panels_VLM_xyz
 
@@ -27,7 +29,6 @@ from InputData.jib_and_main_sail_vlm_case import *
 # np.set_printoptions(precision=3, suppress=True)
 
 start = timeit.default_timer()
-
 interpolator = Interpolator(interpolation_type)
 
 csys_transformations = CSYS_transformations(
@@ -101,7 +102,5 @@ print(f"\nCPU time: {float(timeit.default_timer() - start):.2f} [s]")
 print("Preparing visualization.")
 display_panels_xyz_and_winds(sail_set.panels1d, inlet_condition, inviscid_flow_results, hull)
 
-from Utils.git_utils import get_git_branch
-
-print(get_git_branch())
+print(f"Code version\t branch: {get_git_branch()} \t commit hash: {get_git_revision_hash()}")
 print("Done.")

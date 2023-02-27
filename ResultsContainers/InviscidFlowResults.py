@@ -28,7 +28,7 @@ def prepare_inviscid_flow_results_vlm(gamma_magnitude,
     calc_forces_on_panels_VLM_xyz(inlet_condition.V_app_infs, gamma_magnitude,
                                   sail_set.panels, inlet_condition.rho)
 
-    [panel.calc_pressure() for panel in sail_set.panels1d]
+    # [panel.calc_pressure() for panel in sail_set.panels1d] # we do it elsewhere
 
     N = len(sail_set.panels1d)
     V_induced_at_cp = sail_set.V_induced_at_cp.reshape(N, 3)  # todo: get stuff from panels
@@ -48,6 +48,8 @@ class InviscidFlowResults:
         self.csys_transformations = csys_transformations
         self.gamma_magnitude = gamma_magnitude
         self.pressure = sail_set.pressures.flatten()
+        self.coeff_pressures = sail_set.coeffs_of_pressure.flatten()
+
         self.V_induced_at_cp = V_induced_at_cp
         self.V_app_fs_at_cp = V_app_fs_at_cp
 

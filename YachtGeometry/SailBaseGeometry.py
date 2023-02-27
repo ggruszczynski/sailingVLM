@@ -52,6 +52,10 @@ class SailBaseGeometry:
         return get_stuff_from_panels(self.panels, 'pressure', (self.panels.shape[0], self.panels.shape[1], 1))
 
     @property
+    def coeffs_of_pressure(self):
+        return get_stuff_from_panels(self.panels, 'coeff_of_pressure', (self.panels.shape[0], self.panels.shape[1], 1))
+
+    @property
     def forces_xyz(self):
         return get_stuff_from_panels(self.panels, 'force_xyz', (self.panels.shape[0], self.panels.shape[1], 3))
 
