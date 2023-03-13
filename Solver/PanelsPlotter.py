@@ -215,10 +215,13 @@ def display_panels_xyz_and_winds(panels1d,
                  'Winds: True (green), Apparent (blue), Induced@CP (red) \n'
                  'Centre of Effort & Center of Lateral Resistance (black)')
 
-    display_hull(ax, hull)
+
     display_winds(ax, cp_points, water_size, inlet_condition, inviscid_flow_results)
     # display_forces_xyz(ax, panels1d, inviscid_flow_results)
-    display_CE_CLR(ax, inviscid_flow_results, hull)
+
+    if hull is not None:
+        display_hull(ax, hull)
+        display_CE_CLR(ax, inviscid_flow_results, hull)
 
     if show_plot:
         plt.show()

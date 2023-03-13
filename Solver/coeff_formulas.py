@@ -55,12 +55,17 @@ def get_CL_CD_free_wing(AR, AoA_deg):
     a0 = 2. * np.pi  # dCL/d_alfa in 2D [1/rad]
     e_w = 0.8  # span efficiency factor, range: 0.8 - 1.0
 
-    a = a0 / (1. + a0 / (np.pi * AR * e_w))
+    # a = a0 / (1. + a0 / (np.pi * AR * e_w))
+
+    # "Fundamentals of Aerodynamics" John Anderson | Sixth edition | New York |McGraw-Hill Education | 2017 |
+    penalty = a0 / (np.pi * AR)
+    # a = a0 / (1. + penalty)     # high-aspect-ratio straight wings (5.69)
+    a = a0 / (np.sqrt(1. + penalty**2) + penalty)   # low-aspect-ratio straight wing (5.81)
 
     CL_expected_3d = a * np.deg2rad(AoA_deg)
     CD_ind_expected_3d = CL_expected_3d * CL_expected_3d / (np.pi * AR * e_w)
 
-    return CL_expected_3d, CD_ind_expected_3d
+    return CL_expected_3d, CD_ind_expected_3d, a
 
 
 def get_CL_CD_submerged_wing(AR, AoA_deg, K=1, c=0, h=0):
