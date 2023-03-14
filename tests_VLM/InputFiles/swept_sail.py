@@ -50,15 +50,15 @@ mast_LOA = 0.  # [m]
 # INPUT - GEOMETRY OF THE SAIL
 main_sail_girths = np.array([0.00, 1./8, 1./4, 1./2, 3./4, 7./8, 1.00])
 main_sail_chords = chord * np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-main_sail_centerline_twist_deg = 0 + 0. * main_sail_girths
+main_sail_centerline_twist_deg = 0 + 0. * main_sail_girths  # rotation around the luff (leading edge)
 main_sail_camber = 0*np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01])
 main_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
 
-jib_girths = np.array([0.00, 1./4, 1./2, 3./4, 1.00])
-jib_chords = 1E-6 * np.array([1.0, 1.0, 1.0, 1.0, 1.0])
-jib_centerline_twist_deg = 0 + 0. * jib_girths
-jib_sail_camber = 0*np.array([0.01, 0.01, 0.01, 0.01, 0.01])
-jib_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
+# jib_girths = np.array([0.00, 1./4, 1./2, 3./4, 1.00])
+# jib_chords = 1E-6 * np.array([1.0, 1.0, 1.0, 1.0, 1.0])
+# jib_centerline_twist_deg = 0 + 0. * jib_girths    # rotation around the luff (leading edge)
+# jib_sail_camber = 0*np.array([0.01, 0.01, 0.01, 0.01, 0.01])
+# jib_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
 
 # REFERENCE CSYS
 # The origin of the default CSYS is located @ waterline level and aft face of the mast

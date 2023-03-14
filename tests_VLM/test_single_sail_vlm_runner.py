@@ -78,7 +78,7 @@ class TestVLM_Solver(TestCase):
 
         from Rotations.geometry_calc import rotation_matrix
         F_xyz_total = sail_mirror_multiplier*inviscid_flow_results.F_xyz_total
-        A = rotation_matrix([0, 0, 1], np.deg2rad(-AoA_deg))
+        A = rotation_matrix([0, 0, 1], np.deg2rad(-AoA_deg)) # rotate the wind instead of the lifting surface. Be aware the sail_twist rotates around the luff (leading edge)
         F = np.dot(A, F_xyz_total)  # By definition, the lift force is perpendicular to V_inf
 
         CX_vlm = F[0] / (q * S)
