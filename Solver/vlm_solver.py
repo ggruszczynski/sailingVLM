@@ -22,7 +22,7 @@ def assembly_sys_of_eq(V_app_infw, panels: List[Panel]):
             print(f"assembling v_ind_coeff matrix at ctr_p {i}/{N}")
 
         panel_surf_normal = panels1D[i].get_normal_to_panel()
-        ctr_p = panels1D[i].get_ctr_point_position()
+        ctr_p = panels1D[i].ctr_point_position
         RHS[i] = -np.dot(V_app_infw[i], panel_surf_normal)
 
         for j in range(0, N):

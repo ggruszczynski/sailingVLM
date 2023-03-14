@@ -58,7 +58,7 @@ class InviscidFlowResults:
         self.AWA_app_fs = np.arctan(self.V_app_fs_at_cp[:, 1] / self.V_app_fs_at_cp[:, 0])
         # self.alfa_ind = alfa_app_infs - self.alfa_app_fs
 
-        self.F_xyz = sail_set.forces_xyz.reshape(len(sail_set.panels1d), 3)  # todo: this may cause bugs when changing vstack/hstack arragment of panels in SailGeometry.py
+        self.F_xyz = sail_set.forces_xyz.reshape(len(sail_set.panels1d), 3)  # this may cause bugs when changing vstack/hstack arragment of panels in SailGeometry.py
         F_xyz_above_water, self.F_xyz_total = extract_above_water_quantities(self.F_xyz, cp_points)
 
         r = calc_moment_arm_in_shifted_csys(cp_points, csys_transformations.v_from_original_xyz_2_reference_csys_xyz)
@@ -66,7 +66,7 @@ class InviscidFlowResults:
 
         dyn_dict = {}
         for i in range(len(sail_set.sails)):
-            F_xyz_above_water_tmp = sail_set.extract_data_above_water_by_id(self.F_xyz, i)  # TODO: this does not work for half main above water
+            F_xyz_above_water_tmp = sail_set.extract_data_above_water_by_id(self.F_xyz, i)
             r_tmp = sail_set.extract_data_above_water_by_id(r, i)
 
             F_xyz_above_water_tmp_total = np.sum(F_xyz_above_water_tmp, axis=0)

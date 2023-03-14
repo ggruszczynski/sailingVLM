@@ -42,7 +42,7 @@ class Arrow3D(FancyArrowPatch):
 def _prepare_geometry_data_to_display(panels1d):
     le_mid_points = np.array([panel.get_leading_edge_mid_point() for panel in panels1d])
     cp_points = np.array([panel.cp_position for panel in panels1d])
-    ctr_points = np.array([panel.get_ctr_point_position() for panel in panels1d])
+    ctr_points = np.array([panel.ctr_point_position for panel in panels1d])
     te_midpoints = np.array([panel.get_trailing_edge_mid_points() for panel in panels1d])
 
     return le_mid_points, cp_points, ctr_points, te_midpoints

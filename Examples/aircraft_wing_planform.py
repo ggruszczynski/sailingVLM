@@ -92,7 +92,7 @@ print("DONE")
 # reference values - to compare with book formulas
 AR = 2 * half_wing_span / chord
 S = 2 * half_wing_span * chord
-CL_analytical, CD_ind_analytical, a_analytical = get_CL_CD_free_wing(AR, AoA_deg)
+CL_analytical, CD_ind_analytical, a_analytical = get_CL_CD_free_wing(AR, AoA_deg, sweep_half_chord_deg=0)
 
 total_F = np.sum(F, axis=0)
 q = 0.5 * rho * (np.linalg.norm(V) ** 2)

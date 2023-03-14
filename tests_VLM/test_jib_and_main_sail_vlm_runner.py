@@ -20,7 +20,7 @@ from Solver.vlm_solver import calculate_app_fs
 import pandas as pd
 from pandas.util.testing import assert_frame_equal
 from unittest import TestCase
-
+from numpy.testing import assert_almost_equal
 
 from tests_VLM.InputFiles.case_data_for_vlm_runner import *
 # np.set_printoptions(precision=3, suppress=True)
@@ -44,7 +44,7 @@ class TestVLM_Solver(TestCase):
 
         self.hull = HullGeometry(sheer_above_waterline, foretriangle_base, self.csys_transformations, center_of_lateral_resistance_upright)
 
-    def _prepare_sail_set(self, n_spanwise, n_chordwise):
+    def _prepare_sail_set(self, n_spanwise, n_chordwise, jib_roller):
 
         sail_factory = SailFactory(n_spanwise=n_spanwise, n_chordwise=n_chordwise,
                                    csys_transformations=self.csys_transformations, rake_deg=rake_deg,
@@ -54,7 +54,7 @@ class TestVLM_Solver(TestCase):
             jib_luff=jib_luff,
             foretriangle_base=foretriangle_base,
             foretriangle_height=foretriangle_height,
-            jib_chords=self.interpolator.interpolate_girths(jib_girths, jib_chords, n_spanwise + 1),
+            jib_chords=self.interpolator.interpolate_girths(jib_girths, jib_roller*jib_chords, n_spanwise + 1),
             sail_twist_deg=self.interpolator.interpolate_girths(jib_girths, jib_centerline_twist_deg, n_spanwise + 1),
             mast_LOA=mast_LOA,
             LLT_twist=LLT_twist,
@@ -74,12 +74,7 @@ class TestVLM_Solver(TestCase):
                                                                                main_sail_max_camber_distance_from_luff,
                                                                                n_spanwise + 1))
 
-        sail_set = SailSet([jib_geometry, main_sail_geometry])
-        inlet_condition = InletConditions(self.wind, rho=rho, panels1D=sail_set.panels1d)
-        return sail_set, inlet_condition
-
-
-
+        return jib_geometry, main_sail_geometry
 
     def _check_df_results(self, suffix, inviscid_flow_results, inlet_condition, sail_set):
         inviscid_flow_results.estimate_heeling_moment_from_keel(self.hull.center_of_lateral_resistance)
@@ -111,7 +106,11 @@ class TestVLM_Solver(TestCase):
         suffix = 'vlm'
         n_chordwise = 3
 
-        sail_set, inlet_condition = self._prepare_sail_set(n_spanwise=10, n_chordwise=n_chordwise)
+
+        jib_geometry, main_sail_geometry = self._prepare_sail_set(n_spanwise=10, n_chordwise=n_chordwise, jib_roller=1)
+        sail_set = SailSet([jib_geometry, main_sail_geometry])
+        inlet_condition = InletConditions(self.wind, rho=rho, panels1D=sail_set.panels1d)
+
         gamma_magnitude, v_ind_coeff = calc_circulation(inlet_condition.V_app_infs, sail_set.panels1d)
 
         df_gamma = pd.DataFrame({'gamma_magnitute': gamma_magnitude})
@@ -131,7 +130,10 @@ class TestVLM_Solver(TestCase):
         suffix = 'llt'
         n_chordwise = 1
 
-        sail_set, inlet_condition = self._prepare_sail_set(n_spanwise=10, n_chordwise=n_chordwise)
+        jib_geometry, main_sail_geometry = self._prepare_sail_set(n_spanwise=10, n_chordwise=n_chordwise, jib_roller=1)
+        sail_set = SailSet([jib_geometry, main_sail_geometry])
+        inlet_condition = InletConditions(self.wind, rho=rho, panels1D=sail_set.panels1d)
+
         gamma_magnitude, v_ind_coeff = calc_circulation(inlet_condition.V_app_infs, sail_set.panels1d)
 
         df_gamma = pd.DataFrame({'gamma_magnitute': gamma_magnitude})
@@ -154,7 +156,10 @@ class TestVLM_Solver(TestCase):
         suffix = 'llt'
         n_chordwise = 1
 
-        sail_set, inlet_condition = self._prepare_sail_set(n_spanwise=10, n_chordwise=n_chordwise)
+        jib_geometry, main_sail_geometry = self._prepare_sail_set(n_spanwise=10, n_chordwise=n_chordwise, jib_roller=1)
+        sail_set = SailSet([jib_geometry, main_sail_geometry])
+        inlet_condition = InletConditions(self.wind, rho=rho, panels1D=sail_set.panels1d)
+
         gamma_magnitude, v_ind_coeff = calc_circulation(inlet_condition.V_app_infs, sail_set.panels1d)
 
         df_gamma = pd.DataFrame({'gamma_magnitute': gamma_magnitude})
@@ -169,3 +174,43 @@ class TestVLM_Solver(TestCase):
                                                                    self.csys_transformations)
 
         self._check_df_results(suffix, inviscid_flow_results_vlm, inlet_condition, sail_set)
+
+    def test_calc_forces_and_moments_single_sail(self):
+        jib_geometry, main_sail_geometry = self._prepare_sail_set(n_spanwise=5, n_chordwise=3, jib_roller=1E-6)
+        sail_set1 = SailSet([main_sail_geometry])
+        sail_set2 = SailSet([jib_geometry, main_sail_geometry])
+
+        def get_forces(sail_set):
+            inlet_condition = InletConditions(self.wind, rho=rho, panels1D=sail_set.panels1d)
+            gamma_magnitude, v_ind_coeff = calc_circulation(inlet_condition.V_app_infs, sail_set.panels1d)
+            V_induced_at_ctrl_p, V_app_fs_at_ctrl_p = calculate_app_fs(inlet_condition, v_ind_coeff, gamma_magnitude)
+            assert is_no_flux_BC_satisfied(V_app_fs_at_ctrl_p, sail_set.panels1d)
+            inviscid_flow_results_vlm = prepare_inviscid_flow_results_vlm(gamma_magnitude,
+                                                                          sail_set, inlet_condition,
+                                                                          self.csys_transformations)
+            return inviscid_flow_results_vlm
+
+        results1 = get_forces(sail_set1)
+        results2 = get_forces(sail_set2)
+
+        assert_almost_equal(results1.F_xyz_total, results2.F_xyz_total, decimal=3)
+        assert_almost_equal(results1.F_xyz_total, np.array([-87.13475273, 273.94232855, -53.71087092]), decimal=3)
+        assert_almost_equal(results2.F_xyz_total, np.array([-87.13484521, 273.94260654, -53.71088808]), decimal=3)
+
+        dfi1 = results1.to_df_integral()
+        dfi2 = results2.to_df_integral()
+
+        assert_almost_equal(dfi2.loc[dfi2['Quantity'] == 'F_sails_total_COG.x']['Value'].to_numpy(), -87.13, decimal=2)
+        assert_almost_equal(dfi2.loc[dfi2['Quantity'] == 'F_sails_total_COG.y']['Value'].to_numpy(), 273.94, decimal=2)
+        assert_almost_equal(dfi2.loc[dfi2['Quantity'] == 'F_sails_total_COG.z']['Value'].to_numpy(), -53.71, decimal=2)
+        assert_almost_equal(dfi2.loc[dfi2['Quantity'] == 'F_main_sail_total_COG.x']['Value'].to_numpy(), -87.13, decimal=2)
+        assert_almost_equal(dfi2.loc[dfi2['Quantity'] == 'F_main_sail_total_COG.y']['Value'].to_numpy(), 273.94, decimal=2)
+        assert_almost_equal(dfi2.loc[dfi2['Quantity'] == 'F_main_sail_total_COG.z']['Value'].to_numpy(), -53.71, decimal=2)
+
+        assert_almost_equal(dfi1.loc[dfi1['Quantity'] == 'F_sails_total_COG.x']['Value'].to_numpy(), -87.13, decimal=2)
+        assert_almost_equal(dfi1.loc[dfi1['Quantity'] == 'F_sails_total_COG.y']['Value'].to_numpy(), 273.94, decimal=2)
+        assert_almost_equal(dfi1.loc[dfi1['Quantity'] == 'F_sails_total_COG.z']['Value'].to_numpy(), -53.71, decimal=2)
+        assert_almost_equal(dfi1.loc[dfi1['Quantity'] == 'F_main_sail_total_COG.x']['Value'].to_numpy(), -87.13, decimal=2)
+        assert_almost_equal(dfi1.loc[dfi1['Quantity'] == 'F_main_sail_total_COG.y']['Value'].to_numpy(), 273.94, decimal=2)
+        assert_almost_equal(dfi1.loc[dfi1['Quantity'] == 'F_main_sail_total_COG.z']['Value'].to_numpy(), -53.71, decimal=2)
+

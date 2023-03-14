@@ -23,8 +23,6 @@ from Solver.forces import calc_forces_on_panels_VLM_xyz
 
 # from InputData.jib_and_main_sail_vlm_case_backflow import *
 from InputData.jib_and_main_sail_vlm_case import *
-# from InputData.test import *
-# from InputData.jib_and_main_sail_flat_vlm_case import *
 
 # np.set_printoptions(precision=3, suppress=True)
 
@@ -60,7 +58,6 @@ main_sail_geometry = sail_factory.make_main_sail(
     interpolated_distance_from_LE=interpolator.interpolate_girths(main_sail_girths, main_sail_max_camber_distance_from_luff, n_spanwise + 1))
 
 sail_set = SailSet([jib_geometry, main_sail_geometry])
-
 
 # wind = FlatWindProfile(alpha_true_wind_deg, tws_ref, SOG_yacht)
 wind = ExpWindProfile(

@@ -17,10 +17,14 @@ LLT_twist = "real_twist"  # defines how the Lifting Line discretize the sail twi
 # It can be "sheeting_angle_const" or "average_const" or "real_twist"
 
 # LIKE AN AIRCRAFT
+# Case as in Appendix C from
+# "An Aeroelastic Implementation for Yacht Sails and Rigs"
+# MSc Thesis by Aron Helmstad, Tomas Larsson, KTH, 2013
 chord = 1.             # chord length
 half_wing_span = 5.    # wing span length
-AoA_deg = 10.
+AoA_deg = -10.
 V_inf = 1.
+sweep_angle_deg = 0.
 
 # SAILING CONDITIONS
 leeway_deg = 0.    # [deg]
@@ -37,25 +41,25 @@ wind_reference_measurment_height = 10.  # [m] reference height for exponential w
 rho = 1.225  # air density [kg/m3]
 
 # GEOMETRY OF THE RIG
-main_sail_luff = half_wing_span  # [m]
+main_sail_luff = half_wing_span/np.cos(np.deg2rad(sweep_angle_deg))  # [m]
 jib_luff = 5.0  # [m]
 foretriangle_height = half_wing_span  # [m]
 foretriangle_base = half_wing_span  # [m]
 sheer_above_waterline = 0.0  # [m]
 boom_above_sheer = 0.0  # [m]
-rake_deg = 90.  # rake angle [deg]
+rake_deg = 90. + sweep_angle_deg  # rake angle [deg]
 mast_LOA = 0.  # [m]
 
 # INPUT - GEOMETRY OF THE SAIL
 main_sail_girths = np.array([0.00, 1./8, 1./4, 1./2, 3./4, 7./8, 1.00])
 main_sail_chords = chord * np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
-main_sail_centerline_twist_deg = AoA_deg + 0. * main_sail_girths
+main_sail_centerline_twist_deg = AoA_deg + 0. * main_sail_girths    # rotation around the luff (leading edge)
 main_sail_camber = 0*np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01])
 main_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
 
 jib_girths = np.array([0.00, 1./4, 1./2, 3./4, 1.00])
 jib_chords = 1E-6 * np.array([1.0, 1.0, 1.0, 1.0, 1.0])
-jib_centerline_twist_deg = AoA_deg + 0. * jib_girths
+jib_centerline_twist_deg = AoA_deg + 0. * jib_girths    # rotation around the luff (leading edge)
 jib_sail_camber = 0*np.array([0.01, 0.01, 0.01, 0.01, 0.01])
 jib_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
 

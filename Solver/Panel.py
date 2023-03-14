@@ -58,10 +58,10 @@ class Panel(object):
     def calc_pressure(self):
         area = self.get_panel_area()
         n = self.get_normal_to_panel()
-        self.pressure = np.dot(self.force_xyz, n) / area  # todo: fix sign
+        self.pressure = np.dot(self.force_xyz, n) / area  # todo: is it the sign right?
 
     def calc_pressure_coeff(self, rho, V):
-        self.coeff_of_pressure = self.pressure / (0.5*rho*np.dot(V,V))
+        self.coeff_of_pressure = self.pressure / (0.5*rho*np.dot(V, V))
 
     def _are_points_coplanar(self):
         # P1P2 = self.p1 - self.p2
@@ -148,7 +148,8 @@ class Panel(object):
     def get_trailing_edge_mid_points(self):
         return (self.p4 + self.p1)/2.
 
-    def get_ctr_point_position(self):
+    @property
+    def ctr_point_position(self):
         """
          For a given panel defined by points P1, P2, P3 and P4
          returns the position of the control point P.
