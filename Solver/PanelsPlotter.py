@@ -18,7 +18,7 @@ import matplotlib as mpl
 from ResultsContainers.InviscidFlowResults import InviscidFlowResults
 from Inlet.InletConditions import InletConditions
 from YachtGeometry.HullGeometry import HullGeometry
-
+from Solver.Panel import Panel
 
 class Arrow3D(FancyArrowPatch):
     def __init__(self, xs, ys, zs, *args, **kwargs):
@@ -39,7 +39,7 @@ class Arrow3D(FancyArrowPatch):
         FancyArrowPatch.draw(self, renderer)
 
 
-def _prepare_geometry_data_to_display(panels1d):
+def _prepare_geometry_data_to_display(panels1d: np.array([Panel])):
     le_mid_points = np.array([panel.get_leading_edge_mid_point() for panel in panels1d])
     cp_points = np.array([panel.cp_position for panel in panels1d])
     ctr_points = np.array([panel.get_ctr_point_position() for panel in panels1d])
@@ -48,7 +48,7 @@ def _prepare_geometry_data_to_display(panels1d):
     return le_mid_points, cp_points, ctr_points, te_midpoints
 
 
-def display_panels_xyz(panels1d):
+def display_panels_xyz(panels1d: np.array([Panel]), gamma_magnitude):
 
     fig = plt.figure(figsize=(12, 12))
     ax = plt.axes(projection='3d')
@@ -81,15 +81,18 @@ def display_panels_xyz(panels1d):
     ### plot panels and color by pressure
     # https://stackoverflow.com/questions/15140072/how-to-map-number-to-color-using-matplotlibs-colormap
 
-    pressures = np.array([panel.pressure for panel in panels1d])
-    norm = mpl.colors.Normalize(vmin=min(pressures), vmax=max(pressures))
+    # pressures = np.array([panel.pressure for panel in panels1d])
+    # norm = mpl.colors.Normalize(vmin=min(pressures), vmax=max(pressures))
+    norm = mpl.colors.Normalize(vmin=min(gamma_magnitude), vmax=max(gamma_magnitude))
+
     cmap = cm.hot
     m = cm.ScalarMappable(norm=norm, cmap=cmap)
 
-    for panel in panels1d:
+    for panel, gamma in zip(panels1d, gamma_magnitude):
         vtx = panel.get_points()
         tri = a3.art3d.Poly3DCollection([vtx])
-        tri.set_color(m.to_rgba(panel.pressure))
+        # tri.set_color(m.to_rgba(panel.pressure))
+        tri.set_color(m.to_rgba(gamma))
         tri.set_edgecolor('k')
         ax.add_collection3d(tri)
 
@@ -188,10 +191,10 @@ def display_panels_xyz_and_winds(panels1d,
                                  show_plot=True
 
                                  ):
-    ax, cp_points, water_size = display_panels_xyz(panels1d)
-    ax.set_title('Panels colored by pressure \n'
-                 'Winds: True (green), Apparent (blue), Apparent + Induced (red) \n'
-                 'Centre of Effort & Center of Lateral Resistance (black)')
+    ax, cp_points, water_size = display_panels_xyz(panels1d, inviscid_flow_results.gamma_magnitude)
+    ax.set_title('Sail sections colored by optimal circulation. \n'
+                 'Winds: True (green), Apparent (blue), Apparent + Induced (red). \n'
+                 'Centre of Effort & Center of Lateral Resistance (black).')
 
     display_hull(ax, hull)
     display_winds(ax, cp_points, water_size, inlet_condition, inviscid_flow_results)
