@@ -19,7 +19,7 @@ class TestTrailingEdgePanel(TestCase):
         self.assertTrue(self.panel._are_points_coplanar())
 
     def test_get_horse_shoe_induced_velocity(self):
-        ctr_p = self.panel.get_ctr_point_position()
+        ctr_p = self.panel.ctr_point_position
         dummy_velocity = np.array([0.1, 0.2, 0.3])
         v_ind = self.panel.get_induced_velocity(ctr_p, dummy_velocity)
         v_ind_expected = [0.0200998, -0.0093672, -0.022963]

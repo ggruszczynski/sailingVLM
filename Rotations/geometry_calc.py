@@ -3,7 +3,7 @@ from numpy.linalg import multi_dot, norm
 import math
 
 
-def rotate_around_point(axis, theta, local_csys_origin, point):
+def rotate_points_around_origin_axis(axis, theta, local_csys_origin, point):
     m = rotation_matrix(axis, theta)
     p_in_local_csys = point - local_csys_origin
     length = np.linalg.norm(p_in_local_csys, axis=0)

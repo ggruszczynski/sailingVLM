@@ -26,13 +26,14 @@ class TestForces(TestCase):
         self.te_SE = np.array([chord, -half_wing_span, 0.])  # trailing edge South - East coordinate
 
         AoA_deg = 3.0  # Angle of attack [deg]
+        sweep_half_chord_deg = 0
         self.Ry = rotation_matrix([0, 1, 0], np.deg2rad(AoA_deg))
 
 
         # reference values - to compare with book coeff_formulas
         self.AR = 2 * half_wing_span / chord
         self.S = 2 * half_wing_span * chord
-        self.CL_expected, self.CD_ind_expected = get_CL_CD_free_wing(self.AR, AoA_deg)
+        self.CL_expected, self.CD_ind_expected, _ = get_CL_CD_free_wing(self.AR, AoA_deg, sweep_half_chord_deg)
 
         ### FLIGHT CONDITIONS ###
         self.V = [10.0, 0.0, 0.0]

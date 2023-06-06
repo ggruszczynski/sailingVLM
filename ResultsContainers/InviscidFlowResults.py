@@ -3,7 +3,7 @@ import pandas as pd
 from Solver.forces import calc_moments, extract_above_water_quantities, calc_moment_arm_in_shifted_csys
 from Solver.forces import determine_vector_from_its_dot_and_cross_product
 from Rotations.CSYS_transformations import CSYS_transformations
-from YachtGeometry.SailGeometry import SailSet
+from YachtGeometry.SailSet import SailSet
 
 from Inlet.InletConditions import InletConditions
 from Solver.forces import calc_force_LLT_xyz, calc_forces_on_panels_VLM_xyz
@@ -28,7 +28,7 @@ def prepare_inviscid_flow_results_vlm(gamma_magnitude,
     calc_forces_on_panels_VLM_xyz(inlet_condition.V_app_infs, gamma_magnitude,
                                   sail_set.panels, inlet_condition.rho)
 
-    [panel.calc_pressure() for panel in sail_set.panels1d]
+    # [panel.calc_pressure() for panel in sail_set.panels1d] # we do it elsewhere
 
     N = len(sail_set.panels1d)
     V_induced_at_cp = sail_set.V_induced_at_cp.reshape(N, 3)  # todo: get stuff from panels
@@ -48,6 +48,8 @@ class InviscidFlowResults:
         self.csys_transformations = csys_transformations
         self.gamma_magnitude = gamma_magnitude
         self.pressure = sail_set.pressures.flatten()
+        self.coeff_pressures = sail_set.coeffs_of_pressure.flatten()
+
         self.V_induced_at_cp = V_induced_at_cp
         self.V_app_fs_at_cp = V_app_fs_at_cp
 
@@ -56,7 +58,7 @@ class InviscidFlowResults:
         self.AWA_app_fs = np.arctan(self.V_app_fs_at_cp[:, 1] / self.V_app_fs_at_cp[:, 0])
         # self.alfa_ind = alfa_app_infs - self.alfa_app_fs
 
-        self.F_xyz = sail_set.forces_xyz.reshape(len(sail_set.panels1d), 3)  # todo: this may cause bugs when changing vstack/hstack arragment of panels in SailGeometry.py
+        self.F_xyz = sail_set.forces_xyz.reshape(len(sail_set.panels1d), 3)  # this may cause bugs when changing vstack/hstack arragment of panels in SailGeometry.py
         F_xyz_above_water, self.F_xyz_total = extract_above_water_quantities(self.F_xyz, cp_points)
 
         r = calc_moment_arm_in_shifted_csys(cp_points, csys_transformations.v_from_original_xyz_2_reference_csys_xyz)
