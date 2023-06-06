@@ -18,7 +18,7 @@ from ResultsContainers.InviscidFlowResults import prepare_inviscid_flow_results_
 from Solver.vlm_solver import calculate_app_fs
 
 import pandas as pd
-from pandas.util.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal
 from unittest import TestCase
 from numpy.testing import assert_almost_equal
 
