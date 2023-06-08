@@ -65,16 +65,16 @@ class SailGeometry(SailBaseGeometry, ABC):
         le_SW_underwater = np.array(
             [head_mounting[0], head_mounting[1], -head_mounting[2]])  # leading edge North - West coordinate - mirror
 
-        le_NW = self.csys_transformations.rotate_point_with_mirror(le_NW)
-        le_SW = self.csys_transformations.rotate_point_with_mirror(le_SW)
-        le_SW_underwater = self.csys_transformations.rotate_point_with_mirror(le_SW_underwater)
-        le_NW_underwater = self.csys_transformations.rotate_point_with_mirror(le_NW_underwater)
+        le_NW = self.csys_transformations.rotate_point_around_origin_with_mirror(le_NW)
+        le_SW = self.csys_transformations.rotate_point_around_origin_with_mirror(le_SW)
+        le_SW_underwater = self.csys_transformations.rotate_point_around_origin_with_mirror(le_SW_underwater)
+        le_NW_underwater = self.csys_transformations.rotate_point_around_origin_with_mirror(le_NW_underwater)
 
         if chords is not None:
             chords_vec = np.array([chords, np.zeros(len(chords)), np.zeros(len(chords))])
             chords_vec = chords_vec.transpose()
 
-            rchords_vec = np.array([self.csys_transformations.rotate_point_with_mirror(c) for c in chords_vec])
+            rchords_vec = np.array([self.csys_transformations.rotate_point_around_origin_with_mirror(c) for c in chords_vec])
             frchords_vec = np.flip(rchords_vec, axis=0)
 
             if initial_sail_twist_deg is not None and LLT_twist is not None:
@@ -135,7 +135,7 @@ class SailGeometry(SailBaseGeometry, ABC):
 
     def get_cp_points_upright(self):
         cp_points = self.get_cp_points1d()
-        cp_straight_yacht = np.array([self.csys_transformations.reverse_rotations_with_mirror(p) for p in cp_points])
+        cp_straight_yacht = np.array([self.csys_transformations.reverse_point_rotations_around_origin_with_mirror(p) for p in cp_points])
         return cp_straight_yacht
 
     def sail_cp_to_girths(self):

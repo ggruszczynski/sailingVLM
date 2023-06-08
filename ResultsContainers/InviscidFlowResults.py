@@ -28,7 +28,7 @@ def prepare_inviscid_flow_results_vlm(gamma_magnitude,
     calc_forces_on_panels_VLM_xyz(inlet_condition.V_app_infs, gamma_magnitude,
                                   sail_set.panels, inlet_condition.rho)
 
-    [panel.calc_pressure() for panel in sail_set.panels1d]
+    # [panel.calc_pressure() for panel in sail_set.panels1d] # we do it elsewhere
 
     N = len(sail_set.panels1d)
     V_induced_at_cp = sail_set.V_induced_at_cp.reshape(N, 3)  # todo: get stuff from panels
@@ -48,6 +48,8 @@ class InviscidFlowResults:
         self.csys_transformations = csys_transformations
         self.gamma_magnitude = gamma_magnitude
         self.pressure = sail_set.pressures.flatten()
+        self.coeff_pressures = sail_set.coeffs_of_pressure.flatten()
+
         self.V_induced_at_cp = V_induced_at_cp
         self.V_app_fs_at_cp = V_app_fs_at_cp
 
@@ -56,7 +58,7 @@ class InviscidFlowResults:
         self.AWA_app_fs = np.arctan(self.V_app_fs_at_cp[:, 1] / self.V_app_fs_at_cp[:, 0])
         # self.alfa_ind = alfa_app_infs - self.alfa_app_fs
 
-        self.F_xyz = sail_set.forces_xyz.reshape(len(sail_set.panels1d), 3)  # todo: this may cause bugs when changing vstack/hstack arragment of panels in SailGeometry.py
+        self.F_xyz = sail_set.forces_xyz.reshape(len(sail_set.panels1d), 3)  # this may cause bugs when changing vstack/hstack arragment of panels in SailGeometry.py
         F_xyz_above_water, self.F_xyz_total = extract_above_water_quantities(self.F_xyz, cp_points)
 
         r = calc_moment_arm_in_shifted_csys(cp_points, csys_transformations.v_from_original_xyz_2_reference_csys_xyz)
@@ -64,7 +66,7 @@ class InviscidFlowResults:
 
         dyn_dict = {}
         for i in range(len(sail_set.sails)):
-            F_xyz_above_water_tmp = sail_set.extract_data_above_water_by_id(self.F_xyz, i)  # TODO: this does not work for half main above water
+            F_xyz_above_water_tmp = sail_set.extract_data_above_water_by_id(self.F_xyz, i)
             r_tmp = sail_set.extract_data_above_water_by_id(r, i)
 
             F_xyz_above_water_tmp_total = np.sum(F_xyz_above_water_tmp, axis=0)

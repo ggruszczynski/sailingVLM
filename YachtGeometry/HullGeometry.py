@@ -28,11 +28,11 @@ class HullGeometry:
         deck_starboard_line_underwater = np.array([-1.1*foretriangle_base + scale*chord_x, scale*np.flip(foil.y_lower(chord_x)), -1 * sheers_above_waterline]).transpose()   # right
 
         # apply rotations
-        self.deck_centerline = np.array([csys_transformations.rotate_point_with_mirror(p) for p in deck_centerline])
-        self.deck_port_line = np.array([csys_transformations.rotate_point_with_mirror(p) for p in deck_port_line])
-        self.deck_starboard_line = np.array([csys_transformations.rotate_point_with_mirror(p) for p in deck_starboard_line])
-        self.deck_port_line_underwater = np.array([csys_transformations.rotate_point_with_mirror(p) for p in deck_port_line_underwater])
-        self.deck_starboard_line_underwater = np.array([csys_transformations.rotate_point_with_mirror(p) for p in deck_starboard_line_underwater])
+        self.deck_centerline = np.array([csys_transformations.rotate_point_around_origin_with_mirror(p) for p in deck_centerline])
+        self.deck_port_line = np.array([csys_transformations.rotate_point_around_origin_with_mirror(p) for p in deck_port_line])
+        self.deck_starboard_line = np.array([csys_transformations.rotate_point_around_origin_with_mirror(p) for p in deck_starboard_line])
+        self.deck_port_line_underwater = np.array([csys_transformations.rotate_point_around_origin_with_mirror(p) for p in deck_port_line_underwater])
+        self.deck_starboard_line_underwater = np.array([csys_transformations.rotate_point_around_origin_with_mirror(p) for p in deck_starboard_line_underwater])
 
         self.center_of_lateral_resistance = \
             csys_transformations.rotate_point_without_mirror(center_of_lateral_resistance_upright)  # remember to rotate it not as a mirror!

@@ -27,15 +27,18 @@ from Solver.vlm_solver import is_no_flux_BC_satisfied, calc_induced_velocity
        |    /              \
      le_SW +-----------------+ te_SE
      
- 
 """
 start = timeit.default_timer()
 np.set_printoptions(precision=3, suppress=True)
 
 ### WING DEFINITION ###
-#Parameters #
-chord = 1.              # chord length
-half_wing_span = 100.    # wing span length
+
+# Case as in Appendix C from
+# "An Aeroelastic Implementation for Yacht Sails and Rigs"
+# MSc Thesis by Aron Helmstad, Tomas Larsson, KTH, 2013
+
+chord = 1.             # chord length
+half_wing_span = 5.    # wing span length
 
 # Points defining wing (x,y,z) #
 le_NW = np.array([0., half_wing_span, 0.])      # leading edge North - West coordinate
@@ -44,13 +47,13 @@ le_SW = np.array([0., -half_wing_span, 0.])     # leading edge South - West coor
 te_NE = np.array([chord, half_wing_span, 0.])   # trailing edge North - East coordinate
 te_SE = np.array([chord, -half_wing_span, 0.])  # trailing edge South - East coordinate
 
-AoA_deg = 3.0   # Angle of attack [deg]
+AoA_deg = 10.0   # Angle of attack [deg]
 Ry = rotation_matrix([0, 1, 0], np.deg2rad(AoA_deg))
 # we are going to rotate the geometry
 
 ### MESH DENSITY ###
-ns = 15    # number of panels (spanwise)
-nc = 15   # number of panels (chordwise)
+ns = 32    # number of panels (spanwise)
+nc = 8   # number of panels (chordwise)
 
 panels, mesh = make_panels_from_le_te_points(
     [np.dot(Ry, le_SW),
@@ -64,9 +67,9 @@ rows, cols = panels.shape
 N = rows * cols
 
 ### FLIGHT CONDITIONS ###
-V = 1*np.array([10.0, 0.0, 0.0])
+V = 1*np.array([1.0, 0.0, 0.0])
 V_app_infw = np.array([V for i in range(N)])
-rho = 1.225  # fluid density [kg/m3]
+rho = 1.  # fluid density [kg/m3]
 
 ### CALCULATIONS ###
 gamma_magnitude, v_ind_coeff_at_ctr_p = calc_circulation(V_app_infw, panels)
@@ -89,21 +92,22 @@ print("DONE")
 # reference values - to compare with book formulas
 AR = 2 * half_wing_span / chord
 S = 2 * half_wing_span * chord
-CL_expected, CD_ind_expected = get_CL_CD_free_wing(AR, AoA_deg)
+CL_analytical, CD_ind_analytical, a_analytical = get_CL_CD_free_wing(AR, AoA_deg, sweep_half_chord_deg=0)
 
 total_F = np.sum(F, axis=0)
-q = 0.5 * rho * (np.linalg.norm(V) ** 2) * S
-CL_vlm = total_F[2] / q
-CD_vlm = total_F[0] / q
+q = 0.5 * rho * (np.linalg.norm(V) ** 2)
+CL_vlm = total_F[2] / (q*S)
+CD_vlm = total_F[0] / (q*S)
+
+a_VLM = CL_vlm / np.deg2rad(AoA_deg)
 
 print(f"\nAspect Ratio {AR}")
-print(f"CL_expected {CL_expected:.6f} \t CD_ind_expected {CD_ind_expected:.6f}")
-print(f"CL_vlm      {CL_vlm:.6f}  \t CD_vlm          {CD_vlm:.6f}")
+print(f"CL_vlm  {CL_vlm:.6f}    \t CL_VLM_KTH {4.897*np.deg2rad(AoA_deg):.6f}   \t CL_analytical      {CL_analytical:.6f} ")
+print(f"CD_vlm  {CD_vlm:.6f}    \t CD_vlm_KTH {0.0235:.6f}  \t CD_ind_analytical  {CD_ind_analytical:.6f}")
+print(f"a_VLM   {a_VLM:.6f}     \t a_VLM_KTH  {4.897:.6f}   \t a_analytical       {a_analytical:.6f}")
+
 
 print(f"\n\ntotal_F {str(total_F)}")
 print("=== END ===")
 
 print(f"\nCPU time: {float(timeit.default_timer() - start):.2f} [s]")
-
-
-# po dodaniu TrailingEdge wyniki powinny byc o okolo kilkanacsie procent inne

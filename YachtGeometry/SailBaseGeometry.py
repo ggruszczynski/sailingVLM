@@ -40,8 +40,13 @@ class SailBaseGeometry:
     def get_cp_points_upright(self):
         pass
 
+    def get_ctr_points(self):
+        return get_stuff_from_panels(self.panels, 'ctr_point_position', (self.panels.shape[0], self.panels.shape[1], 3))
+
+    def get_ctr_points1d(self):
+        return get_stuff_from_panels(self.panels1d, 'ctr_point_position', (self.panels1d.shape[0], 3))
     def get_cp_points(self):
-        return get_stuff_from_panels(self.panels, 'cp_position', (self.panels.shape[0], self.panels.shape[1], 1))
+        return get_stuff_from_panels(self.panels, 'cp_position', (self.panels.shape[0], self.panels.shape[1], 3))
 
     def get_cp_points1d(self):
         return get_stuff_from_panels(self.panels1d, 'cp_position', (self.panels1d.shape[0], 3))
@@ -50,6 +55,10 @@ class SailBaseGeometry:
     @property
     def pressures(self):
         return get_stuff_from_panels(self.panels, 'pressure', (self.panels.shape[0], self.panels.shape[1], 1))
+
+    @property
+    def coeffs_of_pressure(self):
+        return get_stuff_from_panels(self.panels, 'coeff_of_pressure', (self.panels.shape[0], self.panels.shape[1], 1))
 
     @property
     def forces_xyz(self):

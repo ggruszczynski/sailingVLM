@@ -49,8 +49,8 @@ class TestRotations(TestCase):
     def test_csys_rotations(self):
         point = np.array([10, 20, 30])
 
-        rotated_point = self.csys_transformations.rotate_point_with_mirror(point)
-        point_back = self.csys_transformations.reverse_rotations_with_mirror(rotated_point)
+        rotated_point = self.csys_transformations.rotate_point_around_origin_with_mirror(point)
+        point_back = self.csys_transformations.reverse_point_rotations_around_origin_with_mirror(rotated_point)
         assert_almost_equal(point, point_back)
         assert_almost_equal(np.array([4.235680201509421, 33.56596871090129, 15.980762113533162]), rotated_point)
 
@@ -86,6 +86,10 @@ class TestRotations(TestCase):
 
         main_sail_girths = np.array([0.00, 1. / 4, 1. / 2, 3. / 4, 7. / 8, 1.00])
         main_sail_chords = np.array([4.00, 3.64, 3.20, 2.64, 2.32, 2.00])
+        main_sail_centerline_twist_deg = 0. * main_sail_girths
+        main_sail_camber = 0 * np.array([0.01, 0.01, 0.01, 0.01, 0.01, 0.01])
+        main_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5, 0.5])
+
         main_sail_luff = 12.4
         sheer_above_waterline = 1.20
         boom_above_sheer = 1.30
@@ -95,16 +99,20 @@ class TestRotations(TestCase):
                                    rake_deg=rake_deg,
                                    sheer_above_waterline=sheer_above_waterline)
 
-        main_sail_geometry = sail_factory.make_main_sail(main_sail_luff=main_sail_luff,
-                                                         boom_above_sheer=boom_above_sheer,
-                                                         main_sail_chords=self.interpolator.interpolate_girths(
-                                                             main_sail_girths,
-                                                             main_sail_chords,
-                                                             n_spanwise + 1))
+        main_sail_geometry = sail_factory.make_main_sail(
+        main_sail_luff=main_sail_luff,
+        boom_above_sheer=boom_above_sheer,
+        main_sail_chords=self.interpolator.interpolate_girths(main_sail_girths, main_sail_chords,n_spanwise + 1),
+        sail_twist_deg=self.interpolator.interpolate_girths(main_sail_girths, main_sail_centerline_twist_deg,n_spanwise + 1),
+        LLT_twist="real_twist",
+        interpolated_camber =self.interpolator.interpolate_girths(main_sail_girths, main_sail_camber, n_spanwise + 1),
+        interpolated_distance_from_LE=self.interpolator.interpolate_girths(main_sail_girths,
+                                                                        main_sail_max_camber_distance_from_luff,
+                                                                        n_spanwise + 1))
 
         point = np.array([10, 20, 30])
-        rotated_point = main_sail_geometry.csys_transformations.rotate_point_with_mirror(point)
-        point_back = main_sail_geometry.csys_transformations.reverse_rotations_with_mirror(rotated_point)
+        rotated_point = main_sail_geometry.csys_transformations.rotate_point_around_origin_with_mirror(point)
+        point_back = main_sail_geometry.csys_transformations.reverse_point_rotations_around_origin_with_mirror(rotated_point)
         assert_almost_equal(point, point_back)
 
     def test_rotations_with_axis_at_origin_of_CSYS(self):
@@ -183,23 +191,24 @@ class TestRotations(TestCase):
 
     def test_data_extractor(self):
         from Solver.forces import extract_above_water_quantities
-        sail_set = self._prepare_sail_set(initial_twist_factor=10., n_spanwise=5, n_chordwise=3)
-        cp_points = sail_set.get_cp_points1d()
+        sail_set = self._prepare_sail_set(initial_twist_factor=10., n_spanwise=5, n_chordwise=4)
+        cp_points1d = sail_set.get_cp_points1d()
+        ctr_points = sail_set.get_ctr_points()
 
-        # assert_almost_equal(cp_points[30], np.array([3.66551554,   7.18780739, -11.10346907]))  # check position of random cp_point
-        # assert_almost_equal(cp_points[49], np.array([3.66551554,   7.18780739,  11.10346907]))  # check position of random cp_point
+        assert_almost_equal(cp_points1d[30], np.array([4.15773793,   7.34161137, -11.06769913]))  # check position of random cp_point
+        assert_almost_equal(ctr_points[3][15], np.array([4.5051305, 2.62906257, 3.01536688]))  # check position of random cp_point
 
-        cp_points_above_water_z_mask, _ = extract_above_water_quantities(cp_points, cp_points)
+        cp_points_above_water_z_mask, _ = extract_above_water_quantities(cp_points1d, cp_points1d)
         assert all(cp_points_above_water_z_mask[:, 2] > 0)  # all z-coordinates are positive, i.e. above water
 
         cp_jib_reference = sail_set.sails[0].get_cp_points1d()
         cp_points_above_water_jib_reference, _ = extract_above_water_quantities(cp_jib_reference, cp_jib_reference)
-        cp_points_above_water_jib_extracted = sail_set.extract_data_above_water_by_id(cp_points, 0)
+        cp_points_above_water_jib_extracted = sail_set.extract_data_above_water_by_id(cp_points1d, 0)
         assert_almost_equal(cp_points_above_water_jib_reference, cp_points_above_water_jib_extracted)
 
         cp_mainsail_reference = sail_set.sails[1].get_cp_points1d()
         cp_points_above_water_mainsail_reference, _ = extract_above_water_quantities(cp_mainsail_reference, cp_mainsail_reference)
-        cp_points_above_water_mainsail_extracted = sail_set.extract_data_above_water_by_id(cp_points, 1)
+        cp_points_above_water_mainsail_extracted = sail_set.extract_data_above_water_by_id(cp_points1d, 1)
         assert_almost_equal(cp_points_above_water_mainsail_reference, cp_points_above_water_mainsail_extracted)
 
         # cp_points_above_water_extracted = np.hstack([cp_points_above_water_jib_extracted, cp_points_above_water_mainsail_extracted])

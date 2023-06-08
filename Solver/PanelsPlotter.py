@@ -42,7 +42,7 @@ class Arrow3D(FancyArrowPatch):
 def _prepare_geometry_data_to_display(panels1d):
     le_mid_points = np.array([panel.get_leading_edge_mid_point() for panel in panels1d])
     cp_points = np.array([panel.cp_position for panel in panels1d])
-    ctr_points = np.array([panel.get_ctr_point_position() for panel in panels1d])
+    ctr_points = np.array([panel.ctr_point_position for panel in panels1d])
     te_midpoints = np.array([panel.get_trailing_edge_mid_points() for panel in panels1d])
 
     return le_mid_points, cp_points, ctr_points, te_midpoints
@@ -81,8 +81,8 @@ def display_panels_xyz(panels1d):
     ### plot panels and color by pressure
     # https://stackoverflow.com/questions/15140072/how-to-map-number-to-color-using-matplotlibs-colormap
 
-    pressures = np.array([panel.pressure for panel in panels1d])
-    norm = mpl.colors.Normalize(vmin=min(pressures), vmax=max(pressures))
+    coeff_of_pressure = np.array([panel.coeff_of_pressure for panel in panels1d])
+    norm = mpl.colors.Normalize(vmin=min(coeff_of_pressure), vmax=max(coeff_of_pressure))
     cmap = cm.hot
     m = cm.ScalarMappable(norm=norm, cmap=cmap)
 
@@ -93,7 +93,7 @@ def display_panels_xyz(panels1d):
         else:
             alpha = 0.15
         tri = a3.art3d.Poly3DCollection([vtx], alpha=alpha)
-        tri.set_color(m.to_rgba(panel.pressure))
+        tri.set_color(m.to_rgba(panel.coeff_of_pressure))
         tri.set_edgecolor('k')
         ax.add_collection3d(tri)
 
@@ -126,8 +126,16 @@ def display_winds(ax, cp_points, water_size,  inlet_condition: InletConditions, 
     shift_x = shift_x0
     shift_y = shift_y0
 
-    V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs, inviscid_flow_results.V_induced_at_cp] # inviscid_flow_results.V_app_fs_at_cp
-    colors = ['green', 'blue', 'red']  # G: True wind, B: - Apparent wind, R: Apparent + Induced wind
+    # V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs, inviscid_flow_results.V_induced_at_cp] # inviscid_flow_results.V_app_fs_at_cp
+    # colors = ['green', 'blue', 'red']  # G: True wind, B: - Apparent wind, R: Apparent + Induced wind
+
+    V_winds = [inlet_condition.tws_at_cp, inlet_condition.V_app_infs,
+               # inviscid_flow_results.V_induced_at_cp
+               ]  # inviscid_flow_results.V_app_fs_at_cp
+    colors = ['green', 'blue', #'red'
+              ]  # G: True wind, B: - Apparent wind, R: Apparent + Induced wind
+
+
     for V_wind, color in zip(V_winds, colors):
         # V_wind = V_winds[2]
         # color = colors[2]
@@ -203,14 +211,17 @@ def display_panels_xyz_and_winds(panels1d,
 
                                  ):
     ax, cp_points, water_size = display_panels_xyz(panels1d)
-    ax.set_title('Panels colored by pressure \n'
+    ax.set_title('Panels colored by coefficient of pressure \n'
                  'Winds: True (green), Apparent (blue), Induced@CP (red) \n'
                  'Centre of Effort & Center of Lateral Resistance (black)')
 
-    display_hull(ax, hull)
+
     display_winds(ax, cp_points, water_size, inlet_condition, inviscid_flow_results)
     # display_forces_xyz(ax, panels1d, inviscid_flow_results)
-    display_CE_CLR(ax, inviscid_flow_results, hull)
+
+    if hull is not None:
+        display_hull(ax, hull)
+        display_CE_CLR(ax, inviscid_flow_results, hull)
 
     if show_plot:
         plt.show()
