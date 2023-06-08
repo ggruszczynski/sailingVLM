@@ -2,7 +2,7 @@
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-
+import warnings
 
 class VlmAirfoil:
     # http://airfoiltools.com/airfoil/naca4digit
@@ -27,18 +27,18 @@ class VlmAirfoil:
 
 
     def __check_naca_params(self):
-        try:
-            if not(self._m <= 0.095 and self._m >= 0):
-                raise ValueError('Max camber must be between 0 and 9.5%!')
+        # try:
+        if not(self._m <= 0.095 and self._m >= 0):
+            warnings.warn('Max camber must be between 0 and 9.5%!')
 
-            if not(self._p <= 0.9 and self._p >= 0):
-                raise ValueError('Max camber position must be between 0 and 90%!')
+        if not(self._p <= 0.9 and self._p >= 0):
+            warnings.warn('Max camber position must be between 0 and 90%!')
 
-            if not(self._t <= 0.4 and self._t >= 0):
-                raise ValueError('Thickness must be between 0 and 40%!')
-        except ValueError as err:
-            print(err.args[0])
-            sys.exit()
+        if not(self._t <= 0.4 and self._t >= 0):
+            warnings.warn('Thickness must be between 0 and 40%!')
+        # except ValueError as err:
+        #     print(err.args[0])
+        #     sys.exit()
 
     def __get_y_camber(self, x):
         # 0 <= x <= p
