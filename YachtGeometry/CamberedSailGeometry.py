@@ -51,7 +51,7 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
         mesh_underwater = rmesh_underwater
 
         ## twist
-        print(f"Applying initial_sail_twist_deg to {self.name} -  Lifting Line, mode: {LLT_twist}")
+        print(f"Applying initial_sail_twist_deg to {self.name}, mode: {LLT_twist}")
         twist_dict = {
             'sheeting_angle_const': np.full(len(initial_sail_twist_deg), np.min(initial_sail_twist_deg)),
             'average_const': np.full(len(initial_sail_twist_deg), np.average(initial_sail_twist_deg)),
