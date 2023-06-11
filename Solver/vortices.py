@@ -118,7 +118,8 @@ def v_induced_by_finite_vortex_line(P, A, B, gamma: 1) -> np.array:
 
     return v_ind
 
-def v_induced_by_horseshoe_vortex(P, A, B, r0, gamma=1):
+@numba.jit(numba.float64[::1](numba.float64[::1], numba.float64[::1], numba.float64[::1], numba.float64[::1], numba.optional(numba.int32)), nopython=True, debug=False)
+def v_induced_by_horseshoe_vortex(P, A, B, r0, gamma=1) -> np.array:
     """
     Induced velocity at point P due to a horseshoe vortex
     of strenght gamma=1 spatially positioned by points A and B,

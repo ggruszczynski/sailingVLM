@@ -64,8 +64,8 @@ class TestVortices(TestCase):
         a_10 = np.array([0.5, -10., 0.], dtype=np.float64)
         b_10 = np.array([0.5, 0., 0.], dtype=np.float64)
 
-        v01 = v_induced_by_horseshoe_vortex(ctr_point_01, a_01, b_01, V)
-        v10 = v_induced_by_horseshoe_vortex(ctr_point_10, a_10, b_10, V)
+        v01 = v_induced_by_horseshoe_vortex(ctr_point_01, a_01, b_01, V, gamma=1)
+        v10 = v_induced_by_horseshoe_vortex(ctr_point_10, a_10, b_10, V, gamma=1)
 
         assert np.allclose(v01, v10)
 

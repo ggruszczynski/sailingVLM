@@ -90,7 +90,7 @@ print(f"Notice:\n"
       f"\tThe forces [N] and moments [Nm] are without profile drag.\n"
       f"\tThe the _COG_ CSYS is aligned in the direction of the yacht movement (course over ground).\n"
       f"\tThe the _COW_ CSYS is aligned along the centerline of the yacht (course over water).\n"
-      f"\tNumber of panels (sail set with mirror): {sail_set.panels.shape}")
+      f"\tNumber of panels per sail: {n_spanwise} x {n_chordwise}")
 
 print(df_integrals)
 

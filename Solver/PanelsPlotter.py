@@ -214,7 +214,7 @@ def display_panels_xyz_and_winds(panels1d,
 
                                  ):
     ax, cp_points, water_size = display_panels_xyz(panels1d, inviscid_flow_results.gamma_magnitude)
-    ax.set_title('Panels colored by coefficient of pressure \n'
+    ax.set_title('VLM mode: Panels colored by coefficient of pressure \n'
                  'Winds: True (green), Apparent (blue), Induced@CP (red) \n'
                  'Centre of Effort & Center of Lateral Resistance (black)')
 
