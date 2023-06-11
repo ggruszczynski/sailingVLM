@@ -48,7 +48,7 @@ def _prepare_geometry_data_to_display(panels1d: np.array([Panel])):
     return le_mid_points, cp_points, ctr_points, te_midpoints
 
 
-def display_panels_xyz(panels1d: np.array([Panel]), gamma_magnitude):
+def display_panels_xyz(panels1d: np.array([Panel]), color_panels_by):
 
     fig = plt.figure(figsize=(12, 12))
     ax = plt.axes(projection='3d')
@@ -80,23 +80,18 @@ def display_panels_xyz(panels1d: np.array([Panel]), gamma_magnitude):
 
     ### plot panels and color by pressure
     # https://stackoverflow.com/questions/15140072/how-to-map-number-to-color-using-matplotlibs-colormap
-
-    coeff_of_pressure = np.array([panel.coeff_of_pressure for panel in panels1d])
-    norm = mpl.colors.Normalize(vmin=min(coeff_of_pressure), vmax=max(coeff_of_pressure))
-
-    # norm = mpl.colors.Normalize(vmin=min(gamma_magnitude), vmax=max(gamma_magnitude))
+    norm = mpl.colors.Normalize(vmin=min(color_panels_by), vmax=max(color_panels_by))
     cmap = cm.hot
     m = cm.ScalarMappable(norm=norm, cmap=cmap)
 
-    for panel, gamma in zip(panels1d, gamma_magnitude):
+    for panel, color_panels_by in zip(panels1d, color_panels_by):
         vtx = panel.get_points()
         if panel.cp_position[2] > 0:
             alpha = 1.00
         else:
             alpha = 0.15
         tri = a3.art3d.Poly3DCollection([vtx], alpha=alpha)
-        tri.set_color(m.to_rgba(panel.coeff_of_pressure))
-        # tri.set_color(m.to_rgba(gamma))
+        tri.set_color(m.to_rgba(color_panels_by))
         tri.set_edgecolor('k')
         ax.add_collection3d(tri)
 
@@ -210,11 +205,21 @@ def display_panels_xyz_and_winds(panels1d,
                                  inlet_condition: InletConditions,
                                  inviscid_flow_results: InviscidFlowResults,
                                  hull: HullGeometry,
-                                 show_plot=True
-
+                                 show_plot=True,
+                                 is_sailopt_mode=False
                                  ):
-    ax, cp_points, water_size = display_panels_xyz(panels1d, inviscid_flow_results.gamma_magnitude)
-    ax.set_title('VLM mode: Panels colored by coefficient of pressure \n'
+    color_panels_by = None
+    title_mode = None
+    if is_sailopt_mode:
+        color_panels_by = inviscid_flow_results.gamma_magnitude
+        title_mode = 'SailOpt mode: Panels colored by optimal circulation \n'
+    else:
+        color_panels_by = np.array([panel.coeff_of_pressure for panel in panels1d])
+        title_mode = 'VLM mode: Panels colored by coefficient of pressure \n'
+
+    ax, cp_points, water_size = display_panels_xyz(panels1d, color_panels_by)
+
+    ax.set_title(f'{title_mode}'
                  'Winds: True (green), Apparent (blue), Induced@CP (red) \n'
                  'Centre of Effort & Center of Lateral Resistance (black)')
 

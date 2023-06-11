@@ -32,20 +32,20 @@ class SailFactory:
                                   0.,
                                   tack_mounting[2]+main_sail_luff*np.sin(self.rake)])
 
-        # main_sail = SailGeometry(head_mounting, tack_mounting, self.csys_transformations,
-        #                          n_spanwise=self._n_spanwise, n_chordwise=self._n_chordwise,
-        #                          chords=main_sail_chords,
-        #                          initial_sail_twist_deg=sail_twist_deg, name="main_sail", LLT_twist=LLT_twist)
+        main_sail = SailGeometry(head_mounting, tack_mounting, self.csys_transformations,
+                                 n_spanwise=self._n_spanwise, n_chordwise=self._n_chordwise,
+                                 chords=main_sail_chords,
+                                 initial_sail_twist_deg=sail_twist_deg, name="main_sail", LLT_twist=LLT_twist)
 
-        cambered_main_sail = CamberedSailGeometry(head_mounting, tack_mounting, self.csys_transformations,
-                                                  n_spanwise=self._n_spanwise, n_chordwise=self._n_chordwise,
-                                                  chords=main_sail_chords,
-                                                  initial_sail_twist_deg=sail_twist_deg, name="main_sail", LLT_twist=LLT_twist,
-                                                  interpolated_camber=interpolated_camber, interpolated_max_camber_distance_from_luff=interpolated_distance_from_LE)
+        # main_sail = CamberedSailGeometry(head_mounting, tack_mounting, self.csys_transformations,
+        #                                           n_spanwise=self._n_spanwise, n_chordwise=self._n_chordwise,
+        #                                           chords=main_sail_chords,
+        #                                           initial_sail_twist_deg=sail_twist_deg, name="main_sail", LLT_twist=LLT_twist,
+        #                                           interpolated_camber=interpolated_camber, interpolated_max_camber_distance_from_luff=interpolated_distance_from_LE)
 
         # pts = main_sail.get_cp_points1d()
         # c_pts = cambered_main_sail.get_cp_points1d()
-        return cambered_main_sail
+        return main_sail
 
     def make_jib(self, jib_luff, foretriangle_base, foretriangle_height, jib_chords=None, sail_twist_deg=None, mast_LOA=0, LLT_twist=None,
                  interpolated_camber=None, interpolated_distance_from_LE=None):
@@ -65,14 +65,15 @@ class SailFactory:
                                   0.,
                                   tack_mounting[2] + jib_luff*np.sin(forestay_angle)])
 
-        # jib = CamberedSailGeometry(head_mounting, tack_mounting,  self.csys_transformations,
-        #                    n_spanwise=self._n_spanwise, n_chordwise=self._n_chordwise,
-        #                    chords=jib_chords,
-        #                    initial_sail_twist_deg=sail_twist_deg, name="jib", LLT_twist=LLT_twist)
+        jib = SailGeometry(head_mounting, tack_mounting, self.csys_transformations,
+                           n_spanwise=self._n_spanwise, n_chordwise=self._n_chordwise,
+                           chords=jib_chords,
+                           initial_sail_twist_deg=sail_twist_deg, name="jib", LLT_twist=LLT_twist)
 
-        cambered_jib = CamberedSailGeometry(head_mounting, tack_mounting, self.csys_transformations,
-                                            n_spanwise=self._n_spanwise, n_chordwise=self._n_chordwise,
-                                            chords=jib_chords,
-                                            initial_sail_twist_deg=sail_twist_deg, name="jib", LLT_twist=LLT_twist,
-                                            interpolated_camber=interpolated_camber, interpolated_max_camber_distance_from_luff=interpolated_distance_from_LE)
-        return cambered_jib
+        # jib = CamberedSailGeometry(head_mounting, tack_mounting, self.csys_transformations,
+        #                                     n_spanwise=self._n_spanwise, n_chordwise=self._n_chordwise,
+        #                                     chords=jib_chords,
+        #                                     initial_sail_twist_deg=sail_twist_deg, name="jib", LLT_twist=LLT_twist,
+        #                                     interpolated_camber=interpolated_camber, interpolated_max_camber_distance_from_luff=interpolated_distance_from_LE)
+        #
+        return jib
