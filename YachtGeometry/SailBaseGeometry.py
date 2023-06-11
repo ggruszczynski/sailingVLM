@@ -13,6 +13,58 @@ from Solver.forces import get_stuff_from_panels
 # np.set_printoptions(precision=3, suppress=True)
 
 class SailBaseGeometry:
+    def __init__(self,
+                 head_mounting: np.array, tack_mounting: np.array,
+                 csys_transformations: CSYS_transformations,
+                 n_spanwise=10, n_chordwise=1, name=None):
+        self._n_spanwise = n_spanwise  # number of panels (span-wise) - above the water
+        self._n_chordwise = n_chordwise  # number of panels (chord-wise) - in LLT there is line instead of panels
+        self.name = name
+
+        self.csys_transformations = csys_transformations
+
+        self.head_mounting = head_mounting
+        self.tack_mounting = tack_mounting
+        """
+            The geometry is described using the following CSYS.
+            le - leading edge (luff) of the sail
+            te - trailing edge (leech) of the sail
+            below is example for the main sail.
+            same for jib.
+
+                        Z ^ (mast)     
+                          |
+                         /|
+                        / |
+                       /  |              ^ Y     
+                   lem_NW +--+tem_NE    / 
+                     /    |   \        /
+                    /     |    \      /
+                   /      |     \    /
+                  /       |      \  /
+                 /        |       \/
+                /         |       /\
+               /          |      /  \
+              /           |     /    \
+             /            |    /      \
+            /      lem_SW |---/--------+tem_SE
+           /              |  /          
+  (bow) ------------------|-/-------------------------| (stern)
+         \                |/                          |
+    ------\---------------*---------------------------|-------------------------> X (water level)
+
+        """
+
+        self.le_NW = head_mounting
+        self.le_SW = tack_mounting
+
+        # mirror z coord in water surface
+        # remember that direction of the lifting-line matters
+        self.le_NW_underwater = np.array(
+            [tack_mounting[0], tack_mounting[1], -tack_mounting[2]])  # leading edge South - West coordinate - mirror
+        self.le_SW_underwater = np.array(
+            [head_mounting[0], head_mounting[1], -head_mounting[2]])  # leading edge North - West coordinate - mirror
+
     @property
     @abstractmethod
     def spans(self):

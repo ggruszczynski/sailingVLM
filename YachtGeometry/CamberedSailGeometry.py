@@ -11,6 +11,7 @@ from YachtGeometry.SailBaseGeometry import SailBaseGeometry
 
 from Rotations.geometry_calc import rotate_points_around_arbitrary_axis
 
+
 class CamberedSailGeometry(SailBaseGeometry, ABC):
     def __init__(self, head_mounting: np.array, tack_mounting: np.array,
                  csys_transformations: CSYS_transformations,
@@ -19,66 +20,22 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
                  interpolated_camber=None, interpolated_max_camber_distance_from_luff=None
                  ):
 
-        self.__n_spanwise = n_spanwise  # number of panels (span-wise) - above the water
-        self.__n_chordwise = n_chordwise  # number of panels (chord-wise) - in LLT there is line instead of panels
-        self.name = name
-
-        self.csys_transformations = csys_transformations
-
-        self.head_mounting = head_mounting
-        self.tack_mounting = tack_mounting
-        """
-            The geometry is described using the following CSYS.
-            le - leading edge (luff) of the sail
-            te - trailing edge (leech) of the sail
-            below is example for the main sail.
-            same for jib.
-
-                        Z ^ (mast)     
-                          |
-                         /|
-                        / |
-                       /  |              ^ Y     
-                   lem_NW +--+tem_NE    / 
-                     /    |   \        /
-                    /     |    \      /
-                   /      |     \    /
-                  /       |      \  /
-                 /        |       \/
-                /         |       /\
-               /          |      /  \
-              /           |     /    \
-             /            |    /      \
-            /      lem_SW |---/--------+tem_SE
-           /              |  /          
-  (bow) ------------------|-/-------------------------| (stern)
-         \                |/                          |
-    ------\---------------*---------------------------|-------------------------> X (water level)
-
-        """
-
-        le_NW = head_mounting
-        le_SW = tack_mounting
-
-        # mirror z coord in water surface
-        # remember that direction of the lifting-line matters
-        le_NW_underwater = np.array(
-            [tack_mounting[0], tack_mounting[1], -tack_mounting[2]])  # leading edge South - West coordinate - mirror
-        le_SW_underwater = np.array(
-            [head_mounting[0], head_mounting[1], -head_mounting[2]])  # leading edge North - West coordinate - mirror
+        super(CamberedSailGeometry, self).__init__(head_mounting, tack_mounting,
+                                           csys_transformations,
+                                           n_spanwise, n_chordwise, name)
 
         chords_vec = np.array([chords, np.zeros(len(chords)), np.zeros(len(chords))])
         chords_vec = chords_vec.transpose()
         fchords_vec = np.flip(chords_vec, axis=0)
 
         # state "zero" (i.e. yacht in an upright position, without any rotations)
-        mesh = make_airfoil_mesh([le_SW, le_NW],
-                                 [self.__n_chordwise, self.__n_spanwise], chords_vec,
+        mesh = make_airfoil_mesh([self.le_SW, self.le_NW],
+                                 [self._n_chordwise, self._n_spanwise], chords_vec,
                                  interpolated_max_camber_distance_from_luff, interpolated_camber)
         sh0, sh1, sh2 = mesh.shape
         mesh = mesh.reshape(sh0*sh1, sh2)
-        mesh_underwater = make_airfoil_mesh([le_SW_underwater, le_NW_underwater],
-                                            [self.__n_chordwise, self.__n_spanwise], fchords_vec,
+        mesh_underwater = make_airfoil_mesh([self.le_SW_underwater, self.le_NW_underwater],
+                                            [self._n_chordwise, self._n_spanwise], fchords_vec,
                                             interpolated_max_camber_distance_from_luff, interpolated_camber).reshape(sh0 * sh1, sh2)
         mesh_underwater = mesh_underwater.reshape(sh0*sh1, sh2)
 
@@ -134,16 +91,6 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
         self.__panels = np.hstack((panels_mirror, panels))  # original version
         self.__panels1D = self.__panels.flatten()
         self.__spans = np.array([panel.get_panel_span_at_cp() for panel in self.panels1d])
-
-    def rotate_chord_around_le(self, axis, chords_vec, sail_twist_deg_vec):
-        # sail_twist = np.deg2rad(45.)
-        # todo: dont forget to reverse rotations in postprocessing (plots)
-
-        # m = rotation_matrix(axis, np.deg2rad(sail_twist_deg))
-        rchords_vec = np.array([
-            np.dot(rotation_matrix(axis, np.deg2rad(t)), c) for t, c in zip(sail_twist_deg_vec, chords_vec)])
-
-        return rchords_vec
 
     def rotate_points_around_le(self, points, p1, p2, sail_twist_deg_vec):
         rotated_points = points

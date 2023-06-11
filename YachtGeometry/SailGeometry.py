@@ -11,64 +11,22 @@ from YachtGeometry.SailBaseGeometry import SailBaseGeometry
 
 
 class SailGeometry(SailBaseGeometry, ABC):
+    #TODO: this class is depreciated - shall be replaced with CamberedSailGeometry
     def __init__(self, head_mounting: np.array, tack_mounting: np.array,
                  csys_transformations: CSYS_transformations,
                  n_spanwise=10, n_chordwise=1, chords=None,
                  initial_sail_twist_deg=None, name=None, LLT_twist=None
                  ):
 
-        self.__n_spanwise = n_spanwise  # number of panels (span-wise) - above the water
-        self.__n_chordwise = n_chordwise  # number of panels (chord-wise) - in LLT there is line instead of panels
-        self.name = name
+        super(SailGeometry, self).__init__(head_mounting, tack_mounting,
+                                           csys_transformations,
+                                           n_spanwise, n_chordwise, name)
 
-        self.csys_transformations = csys_transformations
 
-        self.head_mounting = head_mounting
-        self.tack_mounting = tack_mounting
-        """
-            The geometry is described using the following CSYS.
-            le - leading edge (luff) of the sail
-            te - trailing edge (leech) of the sail
-            below is example for the main sail.
-            same for jib.
-
-                        Z ^ (mast)     
-                          |
-                         /|
-                        / |
-                       /  |              ^ Y     
-                   lem_NW +--+tem_NE    / 
-                     /    |   \        /
-                    /     |    \      /
-                   /      |     \    /
-                  /       |      \  /
-                 /        |       \/
-                /         |       /\
-               /          |      /  \
-              /           |     /    \
-             /            |    /      \
-            /      lem_SW |---/--------+tem_SE
-           /              |  /          
-  (bow) ------------------|-/-------------------------| (stern)
-         \                |/                          |
-    ------\---------------*---------------------------|-------------------------> X (water level)
-
-        """
-
-        le_NW = head_mounting
-        le_SW = tack_mounting
-
-        # mirror z coord in water surface
-        # remember that direction of the lifting-line matters
-        le_NW_underwater = np.array(
-            [tack_mounting[0], tack_mounting[1], -tack_mounting[2]])  # leading edge South - West coordinate - mirror
-        le_SW_underwater = np.array(
-            [head_mounting[0], head_mounting[1], -head_mounting[2]])  # leading edge North - West coordinate - mirror
-
-        le_NW = self.csys_transformations.rotate_point_around_origin_with_mirror(le_NW)
-        le_SW = self.csys_transformations.rotate_point_around_origin_with_mirror(le_SW)
-        le_SW_underwater = self.csys_transformations.rotate_point_around_origin_with_mirror(le_SW_underwater)
-        le_NW_underwater = self.csys_transformations.rotate_point_around_origin_with_mirror(le_NW_underwater)
+        self.le_NW = self.csys_transformations.rotate_point_around_origin_with_mirror(self.le_NW)
+        self.le_SW = self.csys_transformations.rotate_point_around_origin_with_mirror(self.le_SW)
+        self.le_SW_underwater = self.csys_transformations.rotate_point_around_origin_with_mirror(self.le_SW_underwater)
+        self.le_NW_underwater = self.csys_transformations.rotate_point_around_origin_with_mirror(self.le_NW_underwater)
 
         if chords is not None:
             chords_vec = np.array([chords, np.zeros(len(chords)), np.zeros(len(chords))])
@@ -85,37 +43,37 @@ class SailGeometry(SailBaseGeometry, ABC):
                     'real_twist': initial_sail_twist_deg
                 }
                 sail_twist_deg = twist_dict[LLT_twist]
-                axis = le_NW - le_SW  # head - tack
+                axis = self.le_NW - self.le_SW  # head - tack
                 rchords_vec = self.rotate_chord_around_le(axis, rchords_vec, sail_twist_deg)
-                underwater_axis = le_NW_underwater - le_SW_underwater  # head - tack
+                underwater_axis = self.le_NW_underwater - self.le_SW_underwater  # head - tack
                 frchords_vec = self.rotate_chord_around_le(underwater_axis, frchords_vec,
                                                            np.flip(sail_twist_deg, axis=0))
                 pass
 
             panels, mesh = make_panels_from_le_points_and_chords(
-                [le_SW, le_NW],
-                [self.__n_chordwise, self.__n_spanwise],
+                [self.le_SW, self.le_NW],
+                [self._n_chordwise, self._n_spanwise],
                 rchords_vec, gamma_orientation=-1)
 
             panels_mirror, mesh_mirror = make_panels_from_le_points_and_chords(
-                [le_SW_underwater, le_NW_underwater],
-                [self.__n_chordwise, self.__n_spanwise],
+                [self.le_SW_underwater, self.le_NW_underwater],
+                [self._n_chordwise, self._n_spanwise],
                 frchords_vec, gamma_orientation=-1)
         else:
             # make a lifting line instead of panels
-            te_NE = le_NW  # trailing edge North - East coordinate
-            te_SE = le_SW  # trailing edge South - East coordinate
+            te_NE = self.le_NW  # trailing edge North - East coordinate
+            te_SE = self.le_SW  # trailing edge South - East coordinate
 
             panels, mesh = make_panels_from_le_te_points(
-                [le_SW, te_SE, le_NW, te_NE],
-                [self.__n_chordwise, self.__n_spanwise], gamma_orientation=-1)
+                [self.le_SW, te_SE, self.le_NW, te_NE],
+                [self._n_chordwise, self._n_spanwise], gamma_orientation=-1)
 
-            te_NE_underwater = le_NW_underwater  # trailing edge North - East coordinate
-            te_SE_underwater = le_SW_underwater  # trailing edge South - East coordinate
+            te_NE_underwater = self.le_NW_underwater  # trailing edge North - East coordinate
+            te_SE_underwater = self.le_SW_underwater  # trailing edge South - East coordinate
 
             panels_mirror, mesh_mirror = make_panels_from_le_te_points(
-                [le_SW_underwater, te_SE_underwater, le_NW_underwater, te_NE_underwater],
-                [self.__n_chordwise, self.__n_spanwise], gamma_orientation=-1)
+                [self.le_SW_underwater, te_SE_underwater, self.le_NW_underwater, te_NE_underwater],
+                [self._n_chordwise, self._n_spanwise], gamma_orientation=-1)
 
         # https://stackoverflow.com/questions/33356442/when-should-i-use-hstack-vstack-vs-append-vs-concatenate-vs-column-stack
         # self.__panels = np.vstack((panels, panels_mirror))

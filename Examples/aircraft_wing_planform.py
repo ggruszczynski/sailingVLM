@@ -7,7 +7,7 @@ from Rotations.geometry_calc import rotation_matrix
 from Solver.coeff_formulas import get_CL_CD_free_wing
 from Solver.forces import calc_forces_on_panels_VLM_xyz, get_stuff_from_panels
 from Solver.vlm_solver import is_no_flux_BC_satisfied, calc_induced_velocity
-
+from Utils.git_utils import get_git_branch, get_git_revision_hash
 ### GEOMETRY DEFINITION ###
 
 """
@@ -110,4 +110,5 @@ print(f"a_VLM   {a_VLM:.6f}     \t a_VLM_KTH  {4.897:.6f}   \t a_analytical     
 print(f"\n\ntotal_F {str(total_F)}")
 print("=== END ===")
 
+print(f"Code version\t branch: {get_git_branch()} \t commit hash: {get_git_revision_hash()}")
 print(f"\nCPU time: {float(timeit.default_timer() - start):.2f} [s]")
