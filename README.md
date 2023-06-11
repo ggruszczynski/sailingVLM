@@ -1,6 +1,9 @@
 # pyLLTandVLM
 
-[![CircleCI](https://circleci.com/gh/ggruszczynski/sailingVLM/tree/main.svg?style=svg&circle-token=c62058c5c0f125149f3e70358b3280a403d2b2b2)](https://circleci.com/gh/ggruszczynski/sailingVLM/tree/main)
+
+[![CircleCI](https://circleci.com/gh/ggruszczynski/sailingVLM/main.svg?style=svg)](https://circleci.com/gh/ggruszczynski/sailingVLM)
+
+
 python implementation of a 3D Vortex Lattice Method
 
 ```
