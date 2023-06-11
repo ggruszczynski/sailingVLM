@@ -104,6 +104,12 @@ def v_induced_by_finite_vortex_line(P, A, B, gamma: 1) -> np.array:
     v_ind = np.array([0.0, 0.0, 0.0], dtype=np.float64)
     # in nonpython mode must be list reflection to convert list to non python type
     # nested python oject can be badly converted -> recommend to use numba.typed.List
+    # if r1 or r2 or |r1_cross_r2|^2 < epsilon
+    # convert float - |r1_cross_r2|^2 to array with 1 element
+    # this is due to numba
+    # numba do not understand typed list with 2 vectors (r1 nad r2) and scalar like float
+    # sq = np.array([np.square(np.linalg.norm(r1_cross_r2))])
+    # b = is_in_vortex_core(numba.typed.List([r1, r2, sq]))
 
     if not is_in_vortex_core(numba.typed.List([PA, PB, PA_cross_PB])):
         v_ind = PA_cross_PB / np.square(norm(PA_cross_PB))

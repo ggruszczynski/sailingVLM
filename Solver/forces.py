@@ -65,6 +65,7 @@ def calc_force_LLT_xyz(V_app_fs_at_cp, gamma_magnitude, panels1d, rho):
         gamma = span_vectors[i] * gamma_magnitude[i]
         panels1d[i].force_xyz = rho * np.cross(V_app_fs_at_cp[i], gamma)    # there is only one panel chordwise --> leading edge formula
 
+
 def calc_forces_on_panels_VLM_xyz(V_app_infw, gamma_magnitude, panels, rho):
     """
     Katz and Plotkin, p. 346 Chapter 12 / Three-Dimensional Numerical Solution
@@ -87,6 +88,7 @@ def calc_forces_on_panels_VLM_xyz(V_app_infw, gamma_magnitude, panels, rho):
     force_re_xyz = np.full((panels.shape[0], panels.shape[1], 3), 0., dtype=float)
     gamma_re = gamma_magnitude.reshape(panels.shape)
 
+    V_app_infw_re = V_app_infw.reshape(panels.shape[0], panels.shape[1], 3)
     for i in range(0, panels.shape[0]):
         for j in range(0, panels.shape[1]):
             if i == 0:  # leading edge only
@@ -99,6 +101,8 @@ def calc_forces_on_panels_VLM_xyz(V_app_infw, gamma_magnitude, panels, rho):
             panels[i, j].force_xyz = force_tmp
             panels[i, j].V_app_fs_at_cp = V_app_fs_at_cp_re[i, j]
             panels[i, j].V_induced_at_cp = V_induced_at_cp_re[i, j]
+            panels[i, j].calc_pressure()
+            panels[i, j].calc_pressure_coeff(rho, V_app_infw_re[i, j])
 
     # return force_re_xyz, V_app_fs_at_cp, V_induced_at_cp
 

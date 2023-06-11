@@ -3,7 +3,7 @@ from scipy import interpolate
 import warnings
 
 
-def calc_lift_slope_coeff(camber):
+def calc_lift_slope_coeff_vs_camber(camber):
     # a = 2 * np.pi
     # the slope of the lift coefficient versus angle of attack line is 2*PI units per radian
     # camber correction - MEIL: AERODYNAMICS OF A THIN AIRFOIL, Lecture 2 and 3
@@ -32,7 +32,7 @@ def estimate_camber_from_AoA_0lift(AoA_0lift_deg):
 
 
 def calc_twist_deg(CL_sections, alfa_app_fs, leeway_deg, AoA_0lift_deg, camber):
-    a = calc_lift_slope_coeff(camber)
+    a = calc_lift_slope_coeff_vs_camber(camber)
     twist_xy_deg = np.rad2deg(alfa_app_fs - np.deg2rad(AoA_0lift_deg) - CL_sections / a)
     twist_relative_to_yachts_centerline_deg = twist_xy_deg - leeway_deg
     return twist_xy_deg, twist_relative_to_yachts_centerline_deg
@@ -50,17 +50,35 @@ def calculate_sections_chord(CL_sections, gamma_magnitude, V_app_fs_length):
     return chords
 
 
-def get_CL_CD_free_wing(AR, AoA_deg):
-    #  TODO allow tapered wings in book coeff_formulas
+def calc_lift_slope_coeff_vs_AR_sweep(AR, sweep_half_chord_deg):
+    """
+    Fundamentals of Aerodynamics" John Anderson, Sixth edition. | New York, NY : McGraw-Hill Education, [2017]
+    page 474, eq.5.69 - 5.82
+    :param AR: Aspect Ratio
+    :param AoA_deg: angle of attack
+    :param sweep_half_chord_deg: sweep angle of the wing, referenced to the half-chord line
+    :return:
+    """
     a0 = 2. * np.pi  # dCL/d_alfa in 2D [1/rad]
+
+    # penalty = a0 / (np.pi * AR)
+    # a = a0 / (1. + penalty)                         # high-aspect-ratio straight wings (5.69)
+    # a = a0 / (np.sqrt(1. + penalty**2) + penalty)   # low-aspect-ratio straight wing (5.81)
+
+    sweep = np.deg2rad(sweep_half_chord_deg)
+    penalty = np.cos(sweep)*a0/(np.pi * AR)
+    a = a0*np.cos(sweep)/(np.sqrt(1+penalty**2) + penalty)    # low-aspect-ratio swept wing eq 5.82
+
+    return a
+
+def get_CL_CD_free_wing(AR, AoA_deg, sweep_half_chord_deg):
+    a = calc_lift_slope_coeff_vs_AR_sweep(AR, sweep_half_chord_deg)
+
     e_w = 0.8  # span efficiency factor, range: 0.8 - 1.0
-
-    a = a0 / (1. + a0 / (np.pi * AR * e_w))
-
     CL_expected_3d = a * np.deg2rad(AoA_deg)
     CD_ind_expected_3d = CL_expected_3d * CL_expected_3d / (np.pi * AR * e_w)
 
-    return CL_expected_3d, CD_ind_expected_3d
+    return CL_expected_3d, CD_ind_expected_3d, a
 
 
 def get_CL_CD_submerged_wing(AR, AoA_deg, K=1, c=0, h=0):

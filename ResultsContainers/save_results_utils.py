@@ -4,7 +4,7 @@ import os
 from ResultsContainers.InviscidFlowResults import InviscidFlowResults
 # from LLT_optimizer.SectionShapeResults import SectionShapeResults
 from Inlet.InletConditions import InletConditions
-from YachtGeometry.SailGeometry import SailSet
+from YachtGeometry.SailSet import SailSet
 
 
 def save_results_to_file(inviscid_flow_results: InviscidFlowResults,
