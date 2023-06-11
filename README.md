@@ -70,24 +70,22 @@ Notice:
 17                   M_keel_total_COG.z     85.841835
 18            M_keel_total_COW.x (heel)  -1738.504714
 19           M_keel_total_COW.y (pitch)   -800.888715
-20   M_keel_total_COW.z (yaw - JG sign)    -85.841835
-21             M_keel_total_COW.z (yaw)     85.841835
-22              M_main_sail_total_COG.x -10150.594134
-23              M_main_sail_total_COG.y  -3271.189461
-24              M_main_sail_total_COG.z   2534.256594
-25                  M_sails_total_COG.x -13513.183766
-26                  M_sails_total_COG.y  -4841.028686
-27                  M_sails_total_COG.z   1698.726394
-28           M_sails_total_COW.x (heel) -13039.838572
-29          M_sails_total_COW.y (pitch)  -6000.358678
-30  M_sails_total_COW.z (yaw - JG sign)  -1698.726394
-31            M_sails_total_COW.z (yaw)   1698.726394
-32                        M_total_COG.x -15314.874996
-33                        M_total_COG.y  -5487.349108
-34                        M_total_COG.z   1784.568230
-35                 M_total_COW.x (heel) -14778.343286
-36                M_total_COW.y (pitch)  -6801.247393
-37                  M_total_COW.z (yaw)   1784.568230
+20             M_keel_total_COW.z (yaw)     85.841835
+21              M_main_sail_total_COG.x -10150.594134
+22              M_main_sail_total_COG.y  -3271.189461
+23              M_main_sail_total_COG.z   2534.256594
+24                  M_sails_total_COG.x -13513.183766
+25                  M_sails_total_COG.y  -4841.028686
+26                  M_sails_total_COG.z   1698.726394
+27           M_sails_total_COW.x (heel) -13039.838572
+28          M_sails_total_COW.y (pitch)  -6000.358678
+29            M_sails_total_COW.z (yaw)   1698.726394
+30                        M_total_COG.x -15314.874996
+31                        M_total_COG.y  -5487.349108
+32                        M_total_COG.z   1784.568230
+33                 M_total_COW.x (heel) -14778.343286
+34                M_total_COW.y (pitch)  -6801.247393
+35                  M_total_COW.z (yaw)   1784.568230
 CPU time: 12.43 [s]
 ```
 
