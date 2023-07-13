@@ -4,21 +4,28 @@ from Solver.forces import calc_moments, extract_above_water_quantities, calc_mom
 from Solver.forces import determine_vector_from_its_dot_and_cross_product
 from Rotations.CSYS_transformations import CSYS_transformations
 from YachtGeometry.SailSet import SailSet
+from Rotations.geometry_calc import rotation_matrix
 
 from Inlet.InletConditions import InletConditions
 from Solver.forces import calc_force_LLT_xyz, calc_forces_on_panels_VLM_xyz
-
+from typing import List, Tuple
 
 def prepare_inviscid_flow_results_llt(V_app_fs_at_cp, V_induced_at_cp, gamma_magnitude,
                                       sail_set: SailSet,
-                                      inletConditions: InletConditions,
+                                      inlet_condition: InletConditions,
                                       csys_transformations: CSYS_transformations):
 
     # be careful, V_app_fs shall be calculated with respect to cp
-    calc_force_LLT_xyz(V_app_fs_at_cp, gamma_magnitude, sail_set.panels1d, inletConditions.rho)
-    [panel.calc_pressure() for panel in sail_set.panels1d]
+    # calc_force_LLT_xyz(V_app_fs_at_cp, gamma_magnitude, sail_set.panels1d, inlet_condition.rho)
+    # [panel.calc_pressure() for panel in sail_set.panels1d]
+
+    calc_forces_on_panels_VLM_xyz(inlet_condition.V_app_infs, gamma_magnitude,
+                                  sail_set.panels, inlet_condition.rho)
+
     inviscid_flow_results = InviscidFlowResults(gamma_magnitude, V_induced_at_cp, V_app_fs_at_cp, sail_set, csys_transformations)
     return inviscid_flow_results
+
+
 
 def prepare_inviscid_flow_results_vlm(gamma_magnitude,
                                       sail_set: SailSet,
@@ -33,6 +40,38 @@ def prepare_inviscid_flow_results_vlm(gamma_magnitude,
     N = len(sail_set.panels1d)
     V_induced_at_cp = sail_set.V_induced_at_cp.reshape(N, 3)  # todo: get stuff from panels
     V_app_fs_at_cp = sail_set.V_app_fs_at_cp.reshape(N, 3)
+
+    f = sail_set.sails[0].forces_xyz[:,:,0].transpose()
+
+    # TODO
+    q = 0.5 * inlet_condition.rho * (inlet_condition.V_app_infs_length.reshape(sail_set.panels.shape) ** 2) * sail_set.areas.reshape(sail_set.panels.shape)
+    F_xyz = sail_set.forces_xyz
+    #
+    cp_z = sail_set.get_cp_points()[:,:,2]
+    cp1d = sail_set.get_cp_points1d()
+    Cx_vlm, Cy_vlm, Cz_vlm = F_xyz[:,:,0]/q, F_xyz[:,:,1]/q, F_xyz[:,:,2]/q
+    CxCyZy_coeff = sail_set.CxCyCz_coeff
+    # CxCyZy_coeff_spanwise = np.sum(CxCyZy_coeff, axis=0)
+    # rel_AoA_deg = inlet_condition.AWA_infs_deg - csys_transformations.leeway_deg
+
+
+
+
+
+    # pall= sail_set.pressures
+    # # np.sum(sail_set.CxCyCz_coeff[:, :, 0], axis=0)
+    # p_jib = sail_set.sails[0].pressures
+    # pp =  p_jib.reshape(4,18)
+    Cx_jib = np.sum(sail_set.sails[0].CxCyCz_coeff[:, :, 0], axis=0)
+
+    beta_deg = np.rad2deg(np.arctan(sail_set.CxCyCz_coeff[:,:,1] / sail_set.CxCyCz_coeff[:,:,0]))
+    gamma_deg = inlet_condition.AWA_infs_deg.reshape(sail_set.panels.shape) + abs(beta_deg) - np.rad2deg(np.pi/2)
+
+    # todo multiply by a matrix to rotate
+    # ClCdCz = np.cos(np.deg2rad(gamma_deg)) * sail_set.CxCyCz_coeff[:,:,0]
+    # ClCdCz = np.sum(ClCdCz, axis=0)
+
+
     inviscid_flow_results = InviscidFlowResults(gamma_magnitude, V_induced_at_cp, V_app_fs_at_cp,
                                                 sail_set, csys_transformations)
     return inviscid_flow_results
@@ -43,7 +82,7 @@ class InviscidFlowResults:
                  sail_set: SailSet,
                  csys_transformations: CSYS_transformations):
 
-        cp_points = sail_set.get_cp_points1d()
+        cp_points1d = sail_set.get_cp_points1d()
 
         self.csys_transformations = csys_transformations
         self.gamma_magnitude = gamma_magnitude
@@ -55,38 +94,48 @@ class InviscidFlowResults:
 
         self.V_induced_length = np.linalg.norm(self.V_induced_at_cp, axis=1)
         self.V_app_fs_length = np.linalg.norm(self.V_app_fs_at_cp, axis=1)
-        self.AWA_app_fs = np.arctan(self.V_app_fs_at_cp[:, 1] / self.V_app_fs_at_cp[:, 0])
+        self.AWA_app_fs_at_cp = np.arctan(self.V_app_fs_at_cp[:, 1] / self.V_app_fs_at_cp[:, 0])
+        self.AWA_app_fs_at_cp_deg = np.rad2deg(self.AWA_app_fs_at_cp)
         # self.alfa_ind = alfa_app_infs - self.alfa_app_fs
-
+        self.CxCyCz_coeff = sail_set.CxCyCz_coeff
         self.F_xyz = sail_set.forces_xyz.reshape(len(sail_set.panels1d), 3)  # this may cause bugs when changing vstack/hstack arragment of panels in SailGeometry.py
-        F_xyz_above_water, self.F_xyz_total = extract_above_water_quantities(self.F_xyz, cp_points)
+        F_xyz_above_water, self.F_xyz_total = extract_above_water_quantities(self.F_xyz, cp_points1d)
 
-        r = calc_moment_arm_in_shifted_csys(cp_points, csys_transformations.v_from_original_xyz_2_reference_csys_xyz)
-        r_above_water, _ = extract_above_water_quantities(r, cp_points)
+        r = calc_moment_arm_in_shifted_csys(cp_points1d, csys_transformations.v_from_original_xyz_2_reference_csys_xyz)
+        r_above_water, _ = extract_above_water_quantities(r, cp_points1d)
+
+        # TODO
+        # self.altFjib_spanwise_xyz, _ = extract_above_water_quantities(sail_set.sails[0].forces_spanwise_xyz, sail_set.sails[0].get_cp_points()[0,:,:])
+        # self.altFMain_spanwise_xyz, _ = extract_above_water_quantities(sail_set.sails[1].forces_spanwise_xyz, sail_set.sails[1].get_cp_points()[0, :, :])
+        #
 
         dyn_dict = {}
         for i in range(len(sail_set.sails)):
             F_xyz_above_water_tmp = sail_set.extract_data_above_water_by_id(self.F_xyz, i)
             r_tmp = sail_set.extract_data_above_water_by_id(r, i)
 
+            F_xyz_above_water_tmp_re = F_xyz_above_water_tmp.reshape(sail_set.sails[i]._n_chordwise, sail_set.sails[i]._n_spanwise,3)
+            setattr(self, f"F_{sail_set.sails[i].name}_xyz", F_xyz_above_water_tmp_re)
+            setattr(self, f"F_{sail_set.sails[i].name}_spanwise_xyz",  np.sum(F_xyz_above_water_tmp_re, axis=0))
+
             F_xyz_above_water_tmp_total = np.sum(F_xyz_above_water_tmp, axis=0)
-            dyn_dict[f"F_{sail_set.sails[i].name}_total_COG.x"] = F_xyz_above_water_tmp_total[0]
-            dyn_dict[f"F_{sail_set.sails[i].name}_total_COG.y"] = F_xyz_above_water_tmp_total[1]
-            dyn_dict[f"F_{sail_set.sails[i].name}_total_COG.z"] = F_xyz_above_water_tmp_total[2]
+            dyn_dict[f"F_{sail_set.sails[i].name}_total_COG.x (surge)"] = F_xyz_above_water_tmp_total[0]
+            dyn_dict[f"F_{sail_set.sails[i].name}_total_COG.y (sway)"] = F_xyz_above_water_tmp_total[1]
+            dyn_dict[f"F_{sail_set.sails[i].name}_total_COG.z (heave)"] = F_xyz_above_water_tmp_total[2]
 
             M_xyz_tmp = calc_moments(r_tmp, F_xyz_above_water_tmp)
             M_xyz_tmp_total = np.sum(M_xyz_tmp, axis=0)
-            dyn_dict[f"M_{sail_set.sails[i].name}_total_COG.x"] = M_xyz_tmp_total[0]
-            dyn_dict[f"M_{sail_set.sails[i].name}_total_COG.y"] = M_xyz_tmp_total[1]
-            dyn_dict[f"M_{sail_set.sails[i].name}_total_COG.z"] = M_xyz_tmp_total[2]
+            dyn_dict[f"M_{sail_set.sails[i].name}_total_COG.x (heel)"] = M_xyz_tmp_total[0]
+            dyn_dict[f"M_{sail_set.sails[i].name}_total_COG.y (pitch)"] = M_xyz_tmp_total[1]
+            dyn_dict[f"M_{sail_set.sails[i].name}_total_COG.z (yaw)"] = M_xyz_tmp_total[2]
 
         self.dyn_dict = dyn_dict
 
         self.M_xyz = calc_moments(r, self.F_xyz)
-        _, self.M_total_above_water_in_xyz_csys = extract_above_water_quantities(self.M_xyz, cp_points)
+        _, self.M_total_above_water_in_xyz_csys = extract_above_water_quantities(self.M_xyz, cp_points1d)
 
         r_dot_F = np.array([np.dot(r[i], self.F_xyz[i]) for i in range(len(self.F_xyz))])
-        _, r_dot_F_total_above_water = extract_above_water_quantities(r_dot_F, cp_points)
+        _, r_dot_F_total_above_water = extract_above_water_quantities(r_dot_F, cp_points1d)
 
         self.above_water_centre_of_effort_estimate_xyz \
             = determine_vector_from_its_dot_and_cross_product(
@@ -99,10 +148,10 @@ class InviscidFlowResults:
         # np.cross(r_naive, self.F_xyz_total)
 
         self.F_centerline = csys_transformations.from_xyz_to_centerline_csys(self.F_xyz)
-        _, self.F_centerline_total = extract_above_water_quantities(self.F_centerline, cp_points)
+        _, self.F_centerline_total = extract_above_water_quantities(self.F_centerline, cp_points1d)
 
         self.M_centerline_csys = csys_transformations.from_xyz_to_centerline_csys(self.M_xyz)
-        _, M_total_above_water_in_centerline_csys = extract_above_water_quantities(self.M_centerline_csys, cp_points)
+        _, M_total_above_water_in_centerline_csys = extract_above_water_quantities(self.M_centerline_csys, cp_points1d)
         self.M_total_above_water_in_centerline_csys = M_total_above_water_in_centerline_csys
 
     def estimate_heeling_moment_from_keel(self, underwater_centre_of_effort_xyz):
@@ -120,8 +169,8 @@ class InviscidFlowResults:
         yield 'V_app_fs_COG.y', self.V_app_fs_at_cp[:, 1]
         yield 'V_app_fs_COG.z', self.V_app_fs_at_cp[:, 2]
         yield 'V_app_fs_length', self.V_app_fs_length
-        yield 'AWA_fs_COG_deg', np.rad2deg(self.AWA_app_fs)
-        yield 'AWA_fs_COW_deg', np.rad2deg(self.AWA_app_fs) - self.csys_transformations.leeway_deg
+        yield 'AWA_fs_COG_deg', self.AWA_app_fs_at_cp_deg
+        yield 'AWA_fs_COW_deg', self.AWA_app_fs_at_cp_deg - self.csys_transformations.leeway_deg
         yield 'Pressure', self.pressure
         yield 'F_sails_COG.x', self.F_xyz[:, 0]
         yield 'F_sails_COG.y', self.F_xyz[:, 1]

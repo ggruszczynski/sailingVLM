@@ -10,10 +10,10 @@ output_dir_name = os.path.join("results_RC44_GENOA_VLM", time_stamp)
 
 # SOLVER SETTINGS
 n_spanwise = 20  # No of control points (above the water) per sail, recommended: 20-50
-n_chordwise = 10  # No of control points (above the water) per sail, recommended: 20-50
-# AoA_0lift_iterations = 15   # recommended range [10-30] note that running 1 iteration produce a shape without AoA_0lift constraint
-# AoA_0lift_max_change_per_iteration_deg = 0.05  # [deg] recommended range [0.1 - 0.01]
-# wind_sub_iterations = 3  # recommended value 3 - enough to converge CL and Heeling moment constrains
+n_chordwise = 10  # No of control points (above the water) per sail, recommended: 50
+AoA_0lift_iterations = 15   # recommended range [10-30] note that running 1 iteration produce a shape without AoA_0lift constraint
+AoA_0lift_max_change_per_iteration_deg = 0.05  # [deg] recommended range [0.1 - 0.01]
+wind_sub_iterations = 3  # recommended value 3 - enough to converge CL and Heeling moment constrains
 interpolation_type = "spline"  # either "spline" or "linear"
 LLT_twist = "real_twist"  # defines how the Lifting Line discretize the sail twist.
 # It can be "sheeting_angle_const" or "average_const" or "real_twist"
@@ -40,19 +40,20 @@ foretriangle_base = 5.13  # [m]
 sheer_above_waterline = 1.23  # [m]
 boom_above_sheer = 1.41  # [m]
 rake_deg = 95.  # rake angle [deg]
-mast_LOA = 0.24  # [m]
+mast_LOA = 0.24 # [m]
 
 # INPUT - GEOMETRY OF THE SAIL
 main_sail_girths = np.array([0.00, 1./4, 1./2, 3./4, 1.00])
 main_sail_chords = np.array([5.37, 4.98, 4.45, 3.72, 2.49])
 main_sail_centerline_twist_deg = 17. * main_sail_girths + 0
-main_sail_camber = 1*np.array([0.028, 0.083, 0.095, 0.087, 0.013])
+main_sail_camber = 1.*np.array([0.027, 0.063, 0.072, 0.058, 0.02])
 main_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
 
 jib_girths = np.array([0.00, 1./4, 1./2, 3./4, 1.00])
 jib_chords = np.array([7.32, 5.39, 3.55, 1.76, 0.09])
-jib_centerline_twist_deg = 24. * jib_girths + 8.6
-jib_sail_camber = 1*np.array([0.055, 0.100, 0.130, 0.131, 0.01])
+# jib_centerline_twist_deg = 24. * jib_girths + 8.6
+jib_centerline_twist_deg = 20. * jib_girths + 12.
+jib_sail_camber = 1*np.array([0.1, 0.083, 0.082, 0.06, 0.012])
 jib_sail_max_camber_distance_from_luff = np.array([0.5, 0.5, 0.5, 0.5, 0.5])  # distance from luff (leading edge)
 
 # OPTIMIZATION CONSTRAINTS (INEQUALITY)

@@ -4,7 +4,7 @@ import warnings
 from Solver.vortices import \
     v_induced_by_semi_infinite_vortex_line, \
     v_induced_by_finite_vortex_line, \
-    v_induced_by_horseshoe_vortex, \
+    v_induced_by_horseshoe_vortex_basic, \
     normalize
 
 
@@ -37,6 +37,8 @@ class Panel(object):
         self.p1next = p1next
         self.p4next = p4next
 
+        self.area = self._get_panel_area()
+
         self.gamma_orientation = gamma_orientation  # it can be turning clock or counter-clock wise
         # 1 is for a horizontal wing (glider), when air is flowing from below
         # -1 is for a vertical sail, when the wind is going from your back as you look towards the sail
@@ -48,6 +50,7 @@ class Panel(object):
         self.force_xyz = None
         self.V_app_fs_at_cp = None
         self.V_induced_at_cp = None
+        self.CxCyZy_coeff = None
 
         if not self._are_points_coplanar() and not Panel._are_no_coplanar_panels_reported:
             print("Panels are not coplanar (twisted).")
@@ -56,12 +59,15 @@ class Panel(object):
             # raise ValueError("Points on Panel are not coplanar!")
 
     def calc_pressure(self):
-        area = self.get_panel_area()
         n = self.get_normal_to_panel()
-        self.pressure = np.dot(self.force_xyz, n) / area  # todo: is it the sign right?
+        self.pressure = np.dot(self.force_xyz, n) / self.area  # todo: is it the sign right?
 
     def calc_pressure_coeff(self, rho, V):
         self.coeff_of_pressure = self.pressure / (0.5*rho*np.dot(V, V))
+
+    def calc_CxCyCz_coeff(self, rho, V):
+        q = 0.5*rho*np.dot(V, V) * self.area
+        self.CxCyCz_coeff = self.force_xyz / q
 
     def _are_points_coplanar(self):
         # P1P2 = self.p1 - self.p2
@@ -107,7 +113,7 @@ class Panel(object):
         n = normalize(n)
         return n
 
-    def get_panel_area(self):
+    def _get_panel_area(self):
         p = [self.p1, self.p2, self.p3, self.p4]
 
         path = []

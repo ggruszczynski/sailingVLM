@@ -92,11 +92,11 @@ class TestVLM_Solver(TestCase):
         assert_almost_equal(sail_set.panels1d[7].get_vortex_ring_position()[2], np.array([0.550, 0., 0.500]), decimal=3)
         assert_almost_equal(sail_set.get_ctr_points1d()[7], np.array([0.5875, 0., 0.4375]), decimal=4)
 
-        assert_almost_equal(inviscid_flow_results.gamma_magnitude[4:], np.array([0.0239377, 0.02521229, 0.02511784, 0.02187719]), decimal=6)
+        assert_almost_equal(inviscid_flow_results.gamma_magnitude[4:], np.array([0.02393393, 0.02518841, 0.02510398, 0.02188311]), decimal=6)
 
-        assert_almost_equal(F, np.array([0.00031786, 0.02402581, 0.00135887]), decimal=6)
-        assert_almost_equal(CY_vlm, 0.240258, decimal=6)
-        assert_almost_equal(a_VLM, 3.441443, decimal=6)
+        assert_almost_equal(F, np.array([0.00031729, 0.02401127, 0.00135843]), decimal=6)
+        assert_almost_equal(CY_vlm, 0.240112, decimal=6)
+        assert_almost_equal(a_VLM, 3.439361, decimal=6)
 
         def get_gamma_reference(b, V, AoA_deg):
             # Eq 7.48, p368 from "Aerodynamics for Engineers" 5th edition, John. J. Bertin, Pearson 2009

@@ -21,7 +21,7 @@ def v_induced_by_semi_infinite_vortex_line(P: np.ndarray, A: np.array, r0: np.nd
      |	   + P(x,y,z)		to a semi-infinite straight vortex line
      |						starting at A and pointing in the direction of r0
      +---x=============> r0	
-         A		 
+         A
     
     Parameters
     ----------
@@ -119,27 +119,29 @@ def v_induced_by_finite_vortex_line(P, A, B, gamma: 1) -> np.array:
     return v_ind
 
 @numba.jit(numba.float64[::1](numba.float64[::1], numba.float64[::1], numba.float64[::1], numba.float64[::1], numba.optional(numba.int32)), nopython=True, debug=False)
-def v_induced_by_horseshoe_vortex(P, A, B, r0, gamma=1) -> np.array:
+def v_induced_by_horseshoe_vortex_basic(P, B, C, r0, gamma=1) -> np.array:
     """
+    In this (basic) implementation, the legs of the horseshoe follow the V_inf immediately
+
     Induced velocity at point P due to a horseshoe vortex
-    of strenght gamma=1 spatially positioned by points A and B,
+    of strength gamma=1 spatially positioned by points B and C,
     extended to x_Inf(+) in a 3D euclidean space. Circulation
-    direction is: x_Inf(+) -> A -> B -> x_Inf(+)
+    direction is: x_Inf(+) -> B -> C -> x_Inf(+)
 
                 ^
               y |                Points defining the horseshoe
     V_inf       |                are named clockwise.
-    ->     B----|->--+...>...    A direction vector is
+    ->     C----|->--+...>...    A direction vector is
     ->     |    |    |           calculated for each vortex.
     ->     ^    +----|------>
     ->	   |         |       x
-    ->	   A----<----+...<...
+    ->	   B----<----+...<...
 
     Parameters
     ----------
-    P, A, B : array_like
+    P, B, C : array_like
               P - point of reference
-              A, B - points of the horseshoe vortex
+              B, C - points of the horseshoe vortex
               r0 - vortex directional vector (apparent wind of infininte sail 
               (we dont want to iteratively solve induced wind, thus infinite))
 
@@ -148,9 +150,51 @@ def v_induced_by_horseshoe_vortex(P, A, B, r0, gamma=1) -> np.array:
     v : circulation
     """
 
-    vB = v_induced_by_semi_infinite_vortex_line(P, B, r0, gamma=gamma)
-    vAB = v_induced_by_finite_vortex_line(P, A, B, gamma=gamma)
-    vA = v_induced_by_semi_infinite_vortex_line(P, A, r0, gamma=-1 * gamma)
+    vC = v_induced_by_semi_infinite_vortex_line(P, C, r0, gamma=gamma)
+    vBC = v_induced_by_finite_vortex_line(P, B, C, gamma=gamma)
+    vB = v_induced_by_semi_infinite_vortex_line(P, B, r0, gamma=-1 * gamma)
 
-    v = vA + vB + vAB
+    v = vB + vC + vBC
     return v
+
+
+@numba.jit(numba.float64[::1](numba.float64[::1], numba.float64[::1], numba.float64[::1], numba.float64[::1], numba.float64[::1], numba.float64[::1], numba.optional(numba.float64)), nopython=True,debug=True, cache=True)
+def v_induced_by_horseshoe_vortex_improved(p: np.array, A: np.array, B: np.array, C: np.array, D: np.array, r0: np.ndarray,
+                                           gamma_orientation: float = 1.0) -> np.array:
+    """
+     In this (improved) implementation, the legs of the horseshoe go till the end of the vortex ring (points D, A), then follow the V_inf
+
+    Induced velocity at point P due to a horseshoe vortex
+    of strenght gamma=1 spatially positioned by points A and B,
+    extended to x_Inf(+) in a 3D euclidean space. Circulation
+    direction is: x_Inf(+) -> A -> B -> C -> D -> x_Inf(+)
+
+                ^
+              y |                Points defining the horseshoe
+    V_inf       |                are named clockwise.
+    ->     C----|->--D...>...    A direction vector is
+    ->     |    |    |           calculated for each vortex.
+    ->     ^    +----|------>
+    ->	   |         |       x
+    ->	   B----<----A...<...
+
+    Parameters
+    ----------
+    P, B, C : array_like
+              P - point of reference
+              A, B, C, D - points of the horseshoe vortex
+              r0 - vortex directional vector (apparent wind of infininte sail
+              (we dont want to iteratively solve induced wind, thus infinite))
+
+    Returns
+    -------
+    v : circulation
+    """
+    v_AB = v_induced_by_finite_vortex_line(p, A, B, gamma_orientation)
+    v_BC = v_induced_by_finite_vortex_line(p, B, C, gamma_orientation)
+    v_CD = v_induced_by_finite_vortex_line(p, C, D, gamma_orientation)
+
+    vD = v_induced_by_semi_infinite_vortex_line(p, D, r0, gamma_orientation)
+    vA = v_induced_by_semi_infinite_vortex_line(p, A, r0, -1.0 * gamma_orientation)
+    q_ind = v_AB + v_BC + v_CD + vD + vA
+    return q_ind

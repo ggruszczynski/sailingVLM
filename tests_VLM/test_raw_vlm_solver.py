@@ -53,8 +53,8 @@ class TestVLM_Solver(TestCase):
 
         gamma_magnitude, v_ind_coeff = calc_circulation(V_free_stream, self.panels)
 
-        gamma_expected = [-5.26437093, -5.61425005, -5.26437093]
-        assert_almost_equal(gamma_magnitude, gamma_expected)
+        gamma_expected = [-5.26057111, -5.61231088, -5.26057111]
+        assert_almost_equal(gamma_magnitude, gamma_expected, decimal=7)
 
         V_induced = calc_induced_velocity(v_ind_coeff, gamma_magnitude)
         V_app_fs = V_free_stream + V_induced

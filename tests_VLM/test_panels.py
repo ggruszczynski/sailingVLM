@@ -25,10 +25,8 @@ class TestPanels(TestCase):
         self.assertTrue(self.panel._are_points_coplanar())
 
     def test_area(self):
-        calculated_area = self.panel.get_panel_area()
         expected_area = 100.0
-
-        assert_almost_equal(calculated_area, expected_area)
+        assert_almost_equal(self.panel.area, expected_area)
 
     def test_pressure(self):
         self.panel.force_xyz = np.array([3., 2., 1.])

@@ -22,10 +22,14 @@ from ResultsContainers.InviscidFlowResults import InviscidFlowResults
 from Solver.forces import calc_forces_on_panels_VLM_xyz
 
 # from InputData.jib_and_main_sail_vlm_case_backflow import *
-from InputData.jib_and_main_sail_vlm_case import *
-# from InputData.RC44_GENOA_VLM import *
+# from InputData.jib_and_main_sail_vlm_case import *
+# from InputData.debug import *
+from InputData.RC44_GENOA_VLM import *
+# from InputData.RC44_GENOA_OPT_VLM import *
+# from InputData.RC44_GENOA_reef_VLM import *
 # from InputData.jib_and_main_sail_flat_vlm_case import *
 
+import pandas as pd
 # np.set_printoptions(precision=3, suppress=True)
 
 start = timeit.default_timer()
@@ -62,7 +66,6 @@ main_sail_geometry = sail_factory.make_main_sail(
 
 sail_set = SailSet([jib_geometry, main_sail_geometry])
 
-
 # wind = FlatWindProfile(alpha_true_wind_deg, tws_ref, SOG_yacht)
 wind = ExpWindProfile(
     alpha_true_wind_deg, tws_ref, SOG_yacht,
@@ -92,6 +95,7 @@ print(f"Notice:\n"
       f"\tThe the _COW_ CSYS is aligned along the centerline of the yacht (course over water).\n"
       f"\tNumber of panels per sail: {n_spanwise} x {n_chordwise}")
 
+pd.options.display.float_format = '{:.2f}'.format
 print(df_integrals)
 
 
@@ -101,7 +105,9 @@ print(df_integrals)
 print(f"\nCPU time: {float(timeit.default_timer() - start):.2f} [s]")
 
 print("Preparing visualization.")
-display_panels_xyz_and_winds(sail_set.panels1d, inlet_condition, inviscid_flow_results, hull)
+display_panels_xyz_and_winds(sail_set.panels1d, inlet_condition, inviscid_flow_results, hull, output_dir_name)
 
 print(f"Code version\t branch: {get_git_branch()} \t commit hash: {get_git_revision_hash()}")
 print("Done.")
+
+

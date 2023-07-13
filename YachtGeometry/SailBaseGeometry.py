@@ -97,16 +97,24 @@ class SailBaseGeometry:
 
     def get_ctr_points1d(self):
         return get_stuff_from_panels(self.panels1d, 'ctr_point_position', (self.panels1d.shape[0], 3))
+
     def get_cp_points(self):
         return get_stuff_from_panels(self.panels, 'cp_position', (self.panels.shape[0], self.panels.shape[1], 3))
 
     def get_cp_points1d(self):
         return get_stuff_from_panels(self.panels1d, 'cp_position', (self.panels1d.shape[0], 3))
 
-
     @property
     def pressures(self):
         return get_stuff_from_panels(self.panels, 'pressure', (self.panels.shape[0], self.panels.shape[1], 1))
+
+    @property
+    def areas(self):
+        return get_stuff_from_panels(self.panels, 'area', (self.panels.shape[0], self.panels.shape[1], 1))
+
+    @property
+    def CxCyCz_coeff(self):
+        return get_stuff_from_panels(self.panels, 'CxCyCz_coeff', (self.panels.shape[0], self.panels.shape[1], 3))
 
     @property
     def coeffs_of_pressure(self):
@@ -115,6 +123,10 @@ class SailBaseGeometry:
     @property
     def forces_xyz(self):
         return get_stuff_from_panels(self.panels, 'force_xyz', (self.panels.shape[0], self.panels.shape[1], 3))
+
+    @property
+    def forces_spanwise_xyz(self):
+        return np.sum(self.forces_xyz, axis=0)
 
     @property
     def V_app_fs_at_cp(self):

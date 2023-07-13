@@ -122,7 +122,7 @@ print(f"a_VLM   {abs(a_VLM):.6f}     \t a_VLM_KTH  {4.897:.6f}   \t a_analytical
 print(f"\nCPU time: {float(timeit.default_timer() - start):.2f} [s]")
 
 print("Preparing visualization.")
-display_panels_xyz_and_winds(sail_set.panels1d, inlet_condition, inviscid_flow_results, hull=None)
+display_panels_xyz_and_winds(sail_set.panels1d, inlet_condition, inviscid_flow_results, hull=None, output_dir=output_dir_name)
 
 print(f"Code version\t branch: {get_git_branch()} \t commit hash: {get_git_revision_hash()}")
 print("Done.")
