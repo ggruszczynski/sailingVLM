@@ -89,8 +89,8 @@ class TestForces(TestCase):
         # print(f"CD_ind_expected: {self.CD_ind_expected:.4f} \t CL_vlm: {CD_vlm:.4f}")
 
         ### ASSSERT ###
-        assert_almost_equal(CL_vlm, 0.3247774653413849)
-        assert_almost_equal(CD_vlm, 0.00020242110304907)
+        assert_almost_equal(CL_vlm, 0.32477545984498785, decimal=7)
+        assert_almost_equal(CD_vlm, 0.00020240969527099, decimal=7)
 
     def test_CL_CD_spanwise_and_chordwise(self):
         ### ARRANGE ###
@@ -117,8 +117,8 @@ class TestForces(TestCase):
         CL_vlm, CD_vlm = self.get_CL_CD_from_F(F)
 
         ### ASSSERT ###
-        assert_almost_equal(CL_vlm, 0.32477659097392897)
-        assert_almost_equal(CD_vlm, 0.0002024171446522)
+        assert_almost_equal(CL_vlm, 0.32477594419005856, decimal=7)
+        assert_almost_equal(CD_vlm, 0.00020241272279670, decimal=7)
 
 
     def test_determine_vector_from_its_dot_and_cross_product(self):

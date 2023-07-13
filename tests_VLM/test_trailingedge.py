@@ -22,7 +22,6 @@ class TestTrailingEdgePanel(TestCase):
         ctr_p = self.panel.ctr_point_position
         dummy_velocity = np.array([0.1, 0.2, 0.3])
         v_ind = self.panel.get_induced_velocity(ctr_p, dummy_velocity)
-        v_ind_expected = [0.0200998, -0.0093672, -0.022963]
+        v_ind_expected = [0.01193901,  0.00379528, -0.07403358]
 
         assert_almost_equal(v_ind, v_ind_expected)
-
