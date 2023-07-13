@@ -4,8 +4,8 @@ from typing import List
 from Solver.TrailingEdgePanel import TrailingEdgePanel
 import numba
 
-# pomyslec nad jit by kod byl kompilowany
-# to mozna zrownoleglic jakos
+
+# to moznaby zrownoleglic
 def assembly_sys_of_eq(V_app_infw, panels: List[Panel]):
     # lista paneli jest wolna - zmiejszamy ilosc wymiarow listy
     panels1D = panels.flatten()
@@ -68,7 +68,7 @@ def is_no_flux_BC_satisfied(V_app_fw, panels):
 
     for i in range(0, N):
         panel_surf_normal = panels1D[i].get_normal_to_panel()
-        panels_area[i] = panels1D[i].get_panel_area()
+        panels_area[i] = panels1D[i].area
         flux_through_panel[i] = -np.dot(V_app_fw[i], panel_surf_normal)
 
     for area in panels_area:

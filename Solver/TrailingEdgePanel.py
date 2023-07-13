@@ -1,5 +1,5 @@
 from Solver.Panel import Panel
-from Solver.vortices import v_induced_by_horseshoe_vortex
+from Solver.vortices import v_induced_by_horseshoe_vortex_basic, v_induced_by_horseshoe_vortex_improved
 
 
 class TrailingEdgePanel(Panel):
@@ -8,7 +8,8 @@ class TrailingEdgePanel(Panel):
 
     def get_induced_velocity(self, ctr_p, V_app_infw):
         [A, B, C, D] = self.get_vortex_ring_position()
-        v = v_induced_by_horseshoe_vortex(ctr_p, B, C, V_app_infw, self.gamma_orientation)
+        v = v_induced_by_horseshoe_vortex_basic(ctr_p, B, C, V_app_infw, self.gamma_orientation)
+        # v = v_induced_by_horseshoe_vortex_improved(ctr_p, A, B, C, D, V_app_infw, self.gamma_orientation)
         return v
 
     def get_vortex_ring_position(self):

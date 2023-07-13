@@ -103,6 +103,7 @@ def calc_forces_on_panels_VLM_xyz(V_app_infw, gamma_magnitude, panels, rho):
             panels[i, j].V_induced_at_cp = V_induced_at_cp_re[i, j]
             panels[i, j].calc_pressure()
             panels[i, j].calc_pressure_coeff(rho, V_app_infw_re[i, j])
+            panels[i, j].calc_CxCyCz_coeff(rho, V_app_infw_re[i, j])
 
     # return force_re_xyz, V_app_fs_at_cp, V_induced_at_cp
 

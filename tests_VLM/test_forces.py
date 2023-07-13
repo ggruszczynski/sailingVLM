@@ -89,7 +89,7 @@ class TestForces(TestCase):
         # print(f"CD_ind_expected: {self.CD_ind_expected:.4f} \t CL_vlm: {CD_vlm:.4f}")
 
         ### ASSSERT ###
-        assert_almost_equal(CL_vlm, 0.32477746534138485)
+        assert_almost_equal(CL_vlm, 0.3247774653413849)
         assert_almost_equal(CD_vlm, 0.00020242110304907)
 
     def test_CL_CD_spanwise_and_chordwise(self):
@@ -117,7 +117,7 @@ class TestForces(TestCase):
         CL_vlm, CD_vlm = self.get_CL_CD_from_F(F)
 
         ### ASSSERT ###
-        assert_almost_equal(CL_vlm, 0.3247765909739283)
+        assert_almost_equal(CL_vlm, 0.32477659097392897)
         assert_almost_equal(CD_vlm, 0.0002024171446522)
 
 

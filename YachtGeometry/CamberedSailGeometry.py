@@ -27,6 +27,8 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
         chords_vec = np.array([chords, np.zeros(len(chords)), np.zeros(len(chords))])
         chords_vec = chords_vec.transpose()
         fchords_vec = np.flip(chords_vec, axis=0)
+        finterpolated_camber = np.flip(interpolated_camber, axis=0)
+        finterpolated_max_camber_distance_from_luff = np.flip(interpolated_max_camber_distance_from_luff, axis=0)
 
         # state "zero" (i.e. yacht in an upright position, without any rotations)
         mesh = make_airfoil_mesh([self.le_SW, self.le_NW],
@@ -36,7 +38,7 @@ class CamberedSailGeometry(SailBaseGeometry, ABC):
         mesh = mesh.reshape(sh0*sh1, sh2)
         mesh_underwater = make_airfoil_mesh([self.le_SW_underwater, self.le_NW_underwater],
                                             [self._n_chordwise, self._n_spanwise], fchords_vec,
-                                            interpolated_max_camber_distance_from_luff, interpolated_camber).reshape(sh0 * sh1, sh2)
+                                            finterpolated_max_camber_distance_from_luff, finterpolated_camber).reshape(sh0 * sh1, sh2)
         mesh_underwater = mesh_underwater.reshape(sh0*sh1, sh2)
 
         # rotation
