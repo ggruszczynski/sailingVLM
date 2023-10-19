@@ -46,6 +46,7 @@ class Panel(object):
         Panel.panel_counter += 1
 
         self.pressure = None
+        self.normal = None
         self.coeff_of_pressure = None
         self.force_xyz = None
         self.V_app_fs_at_cp = None
@@ -101,17 +102,18 @@ class Panel(object):
         return True
 
     def get_normal_to_panel(self):
-        # definition
-        # for the wing in x-y plane the normal is assumed to be z-axis-positive,
-        # and circulation is assumed to be z-axis-negative
+        if self.normal is None:
+            # definition
+            # for the wing in x-y plane the normal is assumed to be z-axis-positive,
+            # and circulation is assumed to be z-axis-negative
 
-        # formula from Katz and Plotkin,
-        #  Fig 12.11 p 343, Chapter 12.3 Lifting-Surface Solution by Vortex Ring Elements
-        p2_p4 = self.p4 - self.p2
-        p1_p3 = self.p3 - self.p1
-        n = np.cross(p2_p4, p1_p3)
-        n = normalize(n)
-        return n
+            # formula from Katz and Plotkin,
+            #  Fig 12.11 p 343, Chapter 12.3 Lifting-Surface Solution by Vortex Ring Elements
+            p2_p4 = self.p4 - self.p2
+            p1_p3 = self.p3 - self.p1
+            n = np.cross(p2_p4, p1_p3)
+            self.normal = normalize(n)
+        return self.normal
 
     def _get_panel_area(self):
         p = [self.p1, self.p2, self.p3, self.p4]

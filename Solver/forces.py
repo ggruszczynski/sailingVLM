@@ -1,5 +1,6 @@
 import numpy as np
 from Solver.vlm_solver import calc_induced_velocity
+from Solver.vortices import normalize
 
 
 def calc_moment_arm_in_shifted_csys(cp_points, v_from_old_2_new_csys):
@@ -96,15 +97,32 @@ def calc_forces_on_panels_VLM_xyz(V_app_infw, gamma_magnitude, panels, rho):
             else:
                 gamma = panels[i, j].get_span_vector() * (gamma_re[i, j]-gamma_re[i-1, j])
 
-            force_tmp = rho * np.cross(V_app_fs_at_cp_re[i, j], gamma)
-            force_re_xyz[i, j, :] = force_tmp
-            panels[i, j].force_xyz = force_tmp
+            force_xyz_tmp = rho * np.cross(V_app_fs_at_cp_re[i, j], gamma)
+            force_re_xyz[i, j, :] = force_xyz_tmp
+            panels[i, j].force_xyz = force_xyz_tmp
             panels[i, j].V_app_fs_at_cp = V_app_fs_at_cp_re[i, j]
             panels[i, j].V_induced_at_cp = V_induced_at_cp_re[i, j]
             panels[i, j].calc_pressure()
             panels[i, j].calc_pressure_coeff(rho, V_app_infw_re[i, j])
             panels[i, j].calc_CxCyCz_coeff(rho, V_app_infw_re[i, j])
 
+            # we can decompose the aerodynamic force (force_xyz) into three components:
+            # drag: force_xyz projected onto (aligned with) the undisturbed flow direction --- indicated by V_app_infw_re
+            # lift: normal to panel component of (force_xyz - drag)
+            # tangential to panel (remaining stuff)
+            e_infw_tmp = normalize(V_app_infw_re[i, j])
+            panels[i, j].drag = np.dot(force_xyz_tmp, e_infw_tmp) * e_infw_tmp
+            f_tmp = force_xyz_tmp - panels[i, j].drag
+            panels[i, j].lift = np.dot(f_tmp, panels[i, j].get_normal_to_panel()) * panels[i, j].get_normal_to_panel()
+            panels[i, j].tangential = f_tmp - panels[i, j].lift
+
+            # alternatively, we can follow the approach from "Low-Speed Aerodynamics Second Edition", J. Katz, Chappter 12, p. 347, eq 12.25-12.27
+            # observe that the tangential component is not distinguished here
+            panels[i, j].lift_katz = rho * np.cross(V_app_infw_re[i, j], gamma)
+            panels[i, j].drag_katz = rho * np.cross(V_induced_at_cp_re[i, j], gamma)
+
+
+            x =123
     # return force_re_xyz, V_app_fs_at_cp, V_induced_at_cp
 
 def get_stuff_from_panels(panels, stuff, shape):

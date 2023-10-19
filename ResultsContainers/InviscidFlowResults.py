@@ -41,35 +41,14 @@ def prepare_inviscid_flow_results_vlm(gamma_magnitude,
     V_induced_at_cp = sail_set.V_induced_at_cp.reshape(N, 3)  # todo: get stuff from panels
     V_app_fs_at_cp = sail_set.V_app_fs_at_cp.reshape(N, 3)
 
-    f = sail_set.sails[0].forces_xyz[:,:,0].transpose()
-
     # TODO
-    q = 0.5 * inlet_condition.rho * (inlet_condition.V_app_infs_length.reshape(sail_set.panels.shape) ** 2) * sail_set.areas.reshape(sail_set.panels.shape)
-    F_xyz = sail_set.forces_xyz
-    #
-    cp_z = sail_set.get_cp_points()[:,:,2]
-    cp1d = sail_set.get_cp_points1d()
-    Cx_vlm, Cy_vlm, Cz_vlm = F_xyz[:,:,0]/q, F_xyz[:,:,1]/q, F_xyz[:,:,2]/q
-    CxCyZy_coeff = sail_set.CxCyCz_coeff
-    # CxCyZy_coeff_spanwise = np.sum(CxCyZy_coeff, axis=0)
-    # rel_AoA_deg = inlet_condition.AWA_infs_deg - csys_transformations.leeway_deg
+    # q = 0.5 * inlet_condition.rho * (inlet_condition.V_app_infs_length.reshape(sail_set.panels.shape) ** 2) * sail_set.areas.reshape(sail_set.panels.shape)
+    # F_xyz = sail_set.forces_xyz
+    # cp_z = sail_set.get_cp_points()[:,:,2]
+    # cp1d = sail_set.get_cp_points1d()
+    # Cx_vlm, Cy_vlm, Cz_vlm = F_xyz[:,:,0]/q, F_xyz[:,:,1]/q, F_xyz[:,:,2]/q
+    # CxCyZy_coeff = sail_set.CxCyCz_coeff
 
-
-
-
-
-    # pall= sail_set.pressures
-    # # np.sum(sail_set.CxCyCz_coeff[:, :, 0], axis=0)
-    # p_jib = sail_set.sails[0].pressures
-    # pp =  p_jib.reshape(4,18)
-    Cx_jib = np.sum(sail_set.sails[0].CxCyCz_coeff[:, :, 0], axis=0)
-
-    beta_deg = np.rad2deg(np.arctan(sail_set.CxCyCz_coeff[:,:,1] / sail_set.CxCyCz_coeff[:,:,0]))
-    gamma_deg = inlet_condition.AWA_infs_deg.reshape(sail_set.panels.shape) + abs(beta_deg) - np.rad2deg(np.pi/2)
-
-    # todo multiply by a matrix to rotate
-    # ClCdCz = np.cos(np.deg2rad(gamma_deg)) * sail_set.CxCyCz_coeff[:,:,0]
-    # ClCdCz = np.sum(ClCdCz, axis=0)
 
 
     inviscid_flow_results = InviscidFlowResults(gamma_magnitude, V_induced_at_cp, V_app_fs_at_cp,
